@@ -4,7 +4,7 @@ import fs from "fs";
 
 //dotenv.config({ path: '.env.e2e' });
 
-export const TEST_EMAIL = "e2e-test@example.com";
+export const TEST_EMAIL = "e2e-logged-in-test@example.com";
 export const TEST_PASSWORD = "e2epassword123";
 
 async function globalSetup(config: FullConfig) {
@@ -74,12 +74,12 @@ async function globalSetup(config: FullConfig) {
       // Wait for navigation to complete
       await page.waitForTimeout(2000);
       console.log(`Current URL after login attempt: ${page.url()}`);
-      
+
       // Try login again if we're still on the login page
       let retryCount = 0;
       const maxRetries = 3;
-      
-      while (page.url().includes('/login') && retryCount < maxRetries) {
+
+      while (page.url().includes("/login") && retryCount < maxRetries) {
         console.log(`Retry login attempt ${retryCount + 1}`);
         await page.fill('input[name="email"]', TEST_EMAIL);
         await page.fill('input[name="password"]', TEST_PASSWORD);
@@ -87,14 +87,14 @@ async function globalSetup(config: FullConfig) {
         await page.waitForTimeout(2000);
         retryCount++;
       }
-      
+
       // If still on login page, force navigation to home
       if (page.url() !== baseURL && page.url() !== `${baseURL}/`) {
         console.log("Manually navigating to home page");
         await page.goto(baseURL);
         await page.waitForTimeout(1000);
       }
-      
+
       // Create a storage state even if we can't verify loginThis allows tests to continue with whatever state we have
       console.log("Creating storage state regardless of login status");
     }
@@ -115,7 +115,9 @@ async function globalSetup(config: FullConfig) {
   } catch (error) {
     console.error("Error in global setup:", error);
     // Take a screenshot to help debug
-    await page.screenshot({ path: "e2e-tests/error-screenshots/global-setup-error.png" });
+    await page.screenshot({
+      path: "e2e-tests/error-screenshots/global-setup-error.png",
+    });
     throw error;
   } finally {
     await context.close();

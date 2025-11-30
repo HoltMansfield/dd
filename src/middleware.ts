@@ -17,6 +17,13 @@ export function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get("session_user");
   const isAuthenticated = !!sessionCookie?.value;
 
+  // Block E2E routes unless in E2E environment
+  if (pathname.startsWith("/e2e")) {
+    if (process.env.NEXT_PUBLIC_APP_ENV !== "E2E") {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
   // Check if the current path requires authentication
   const isProtectedPath = protectedPaths.some((path) =>
     pathname.startsWith(path)

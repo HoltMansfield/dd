@@ -151,12 +151,13 @@ export default function DocumentsList({
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
+    <div className="w-full max-w-4xl mx-auto" data-testid="documents-list">
       <h2 className="text-2xl font-bold text-gray-800 mb-4">Your Documents</h2>
       <div className="space-y-3">
         {documents.map((doc) => (
           <div
             key={doc.id}
+            data-testid="document-item"
             className="flex items-center justify-between p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
           >
             <div className="flex items-center gap-3 flex-1 min-w-0">

@@ -34,21 +34,43 @@ type UploadResult = {
 export async function uploadDocument(
   formData: FormData
 ): Promise<UploadResult> {
+  console.log("[uploadDocument] Starting upload process");
+  console.log(
+    "[uploadDocument] Supabase URL:",
+    process.env.NEXT_PUBLIC_SUPABASE_URL
+  );
+  console.log(
+    "[uploadDocument] Has Service Role Key:",
+    !!process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+
   try {
     // Get current user ID
     const userId = await getCurrentUserId();
+    console.log("[uploadDocument] User ID:", userId);
     if (!userId) {
+      console.log("[uploadDocument] ERROR: No user ID found");
       return { success: false, error: "Unauthorized. Please log in." };
     }
 
     // Get file from form data
     const file = formData.get("file") as File;
+    console.log(
+      "[uploadDocument] File received:",
+      file?.name,
+      "Size:",
+      file?.size,
+      "Type:",
+      file?.type
+    );
     if (!file) {
+      console.log("[uploadDocument] ERROR: No file in form data");
       return { success: false, error: "No file provided" };
     }
 
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
+      console.log("[uploadDocument] ERROR: File too large");
       return {
         success: false,
         error: `File size exceeds maximum of ${MAX_FILE_SIZE / 1024 / 1024}MB`,
@@ -57,6 +79,7 @@ export async function uploadDocument(
 
     // Validate MIME type
     if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+      console.log("[uploadDocument] ERROR: Invalid MIME type:", file.type);
       return {
         success: false,
         error: `File type ${file.type} is not allowed. Allowed types: PDF, images, Excel, Word, CSV`,
@@ -67,12 +90,18 @@ export async function uploadDocument(
     const fileId = uuidv4();
     const fileExtension = file.name.split(".").pop();
     const storagePath = `${userId}/${fileId}.${fileExtension}`;
+    console.log("[uploadDocument] Storage path:", storagePath);
+    console.log("[uploadDocument] Bucket name:", BUCKET_NAME);
 
     // Convert file to buffer
+    console.log("[uploadDocument] Converting file to buffer...");
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+    console.log("[uploadDocument] Buffer size:", buffer.length);
 
     // Upload to Supabase Storage
+    console.log("[uploadDocument] Starting Supabase upload...");
+    const uploadStartTime = Date.now();
     const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
       .from(BUCKET_NAME)
       .upload(storagePath, buffer, {
@@ -80,19 +109,27 @@ export async function uploadDocument(
         cacheControl: "3600",
         upsert: false,
       });
+    const uploadDuration = Date.now() - uploadStartTime;
+    console.log(
+      "[uploadDocument] Supabase upload completed in",
+      uploadDuration,
+      "ms"
+    );
 
     if (uploadError) {
-      console.error("Supabase upload error:", uploadError);
+      console.error("[uploadDocument] Supabase upload error:", uploadError);
       return {
         success: false,
         error: `Failed to upload file: ${uploadError.message}`,
       };
     }
+    console.log("[uploadDocument] Supabase upload successful:", uploadData);
 
     // Get optional description from form data
     const description = formData.get("description") as string | null;
 
     // Save metadata to Neon DB
+    console.log("[uploadDocument] Saving metadata to database...");
     const [document] = await db
       .insert(documents)
       .values({
@@ -106,12 +143,22 @@ export async function uploadDocument(
       })
       .returning();
 
+    console.log(
+      "[uploadDocument] Database insert successful. Document ID:",
+      document.id
+    );
+    console.log("[uploadDocument] Upload process completed successfully");
+
     return {
       success: true,
       documentId: document.id,
     };
   } catch (error) {
-    console.error("Upload document error:", error);
+    console.error("[uploadDocument] FATAL ERROR:", error);
+    console.error(
+      "[uploadDocument] Error stack:",
+      error instanceof Error ? error.stack : "No stack trace"
+    );
     return {
       success: false,
       error: "An unexpected error occurred during upload",

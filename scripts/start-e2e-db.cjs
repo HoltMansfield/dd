@@ -6,7 +6,7 @@ const POSTGRES_IMAGE = "postgres:15";
 const CONTAINER_NAME = "e2e-test-postgres";
 const POSTGRES_USER = "test";
 const POSTGRES_PASSWORD = "test";
-const POSTGRES_DB = "testdb";
+const POSTGRES_DB = "testdb-dd";
 const PORT = 5433; // avoid clashing with local postgres
 
 function run(cmd) {

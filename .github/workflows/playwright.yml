@@ -16,7 +16,7 @@ jobs:
         env:
           POSTGRES_PASSWORD: test
           POSTGRES_USER: test
-          POSTGRES_DB: testdb
+          POSTGRES_DB: testdb-dd
         ports:
           - 5433:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
@@ -69,7 +69,7 @@ jobs:
       - name: Create .env.e2e
         run: |
           echo "NEXT_PUBLIC_APP_ENV=E2E" > .env.e2e
-          echo "DB_URL=postgresql://test:test@localhost:5433/testdb" >> .env.e2e
+          echo "DB_URL=postgresql://test:test@localhost:5433/testdb-dd" >> .env.e2e
           echo "MIGRATIONS_PATH=./drizzle/e2e-migrations" >> .env.e2e
           echo "E2E_URL=http://localhost:3001" >> .env.e2e
           chmod 600 .env.e2e

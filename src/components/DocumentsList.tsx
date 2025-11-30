@@ -13,7 +13,7 @@ import {
   Trash2,
   Loader2,
   File,
-  Image,
+  Image as ImageIcon,
   FileSpreadsheet,
 } from "lucide-react";
 
@@ -98,7 +98,7 @@ export default function DocumentsList({
 
   const getFileIcon = (mimeType: string) => {
     if (mimeType.startsWith("image/")) {
-      return <Image className="w-5 h-5 text-purple-600" />;
+      return <ImageIcon className="w-5 h-5 text-purple-600" />;
     }
     if (mimeType.includes("spreadsheet") || mimeType.includes("excel")) {
       return <FileSpreadsheet className="w-5 h-5 text-green-600" />;

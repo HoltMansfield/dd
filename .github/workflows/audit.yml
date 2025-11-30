@@ -1,0 +1,22 @@
+name: Dependency Audit
+
+on:
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  audit:
+    name: Audit Dependencies
+    runs-on: ubuntu-latest
+    environment: CI # this is where environment variables are set
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - name: Install dependencies
+        run: npm ci
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+        # Fails on high or critical severity vulnerabilities
+        # Moderate severity vulnerabilities are reported but don't fail the build

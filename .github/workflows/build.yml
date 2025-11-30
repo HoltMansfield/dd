@@ -1,0 +1,26 @@
+name: Next.js Build
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build:
+    name: Build Next.js App
+    #environment: CI # this is where environment variables are set
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_APP_ENV: CI
+      # SENTRY_AUTH_TOKEN is needed when Sentry webpack plugin is enabled in next.config.ts
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - name: Install dependencies
+        run: npm ci
+      - name: Build Next.js app
+        run: npm run build

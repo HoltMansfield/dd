@@ -1,0 +1,53 @@
+name: Upload Sentry Sourcemaps
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  upload-sourcemaps:
+    runs-on: ubuntu-latest
+    environment: CI
+    env:
+      NEXT_PUBLIC_APP_ENV: CI
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_ORG: holt-mansfield-2h
+      SENTRY_PROJECT: deal-decoder
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Next.js app
+        run: npm run build
+
+      - name: Install Sentry CLI
+        run: curl -sL https://sentry.io/get-cli/ | bash
+
+      - name: Create Sentry release
+        run: |
+          export SENTRY_RELEASE=$(sentry-cli releases propose-version)
+          echo "SENTRY_RELEASE=$SENTRY_RELEASE" >> $GITHUB_ENV
+          sentry-cli releases new "$SENTRY_RELEASE"
+          sentry-cli releases set-commits "$SENTRY_RELEASE" --auto
+
+      - name: Upload sourcemaps
+        run: |
+          sentry-cli sourcemaps upload \
+            --release "$SENTRY_RELEASE" \
+            --url-prefix "~/_next" \
+            .next/static
+
+      - name: Finalize release
+        run: |
+          sentry-cli releases finalize "$SENTRY_RELEASE"
+          sentry-cli releases deploys "$SENTRY_RELEASE" new -e production

@@ -1,0 +1,9 @@
+.submit-btn-pulse {
+  animation: submit-btn-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes submit-btn-pulse {
+  0% { opacity: 0.8; }
+  50% { opacity: 0.4; }
+  100% { opacity: 0.8; }
+}

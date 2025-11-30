@@ -1,0 +1,1 @@
+ALTER TABLE "verificationTokens" DROP CONSTRAINT "verificationTokens_identifier_token_pk";

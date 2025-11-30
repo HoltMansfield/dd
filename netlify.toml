@@ -1,0 +1,16 @@
+# Netlify configuration for Next.js SSR
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[functions]
+  directory = ".netlify/functions"
+
+[dev]
+  command = "npm run dev"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

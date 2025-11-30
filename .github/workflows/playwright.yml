@@ -24,13 +24,13 @@ jobs:
       NEXT_PUBLIC_APP_ENV: E2E
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          
+
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
@@ -72,6 +72,9 @@ jobs:
           echo "DB_URL=postgresql://test:test@localhost:5433/testdb-dd" >> .env.e2e
           echo "MIGRATIONS_PATH=./drizzle/e2e-migrations" >> .env.e2e
           echo "E2E_URL=http://localhost:3001" >> .env.e2e
+          echo "NEXT_PUBLIC_SUPABASE_URL=${{ vars.NEXT_PUBLIC_SUPABASE_URL }}" >> .env.e2e
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" >> .env.e2e
+          echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> .env.e2e
           chmod 600 .env.e2e
 
       - name: Run database migrations

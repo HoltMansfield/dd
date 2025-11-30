@@ -49,8 +49,8 @@ test("register, login, and logout flow", async ({ page }) => {
   const pageContent = await page.content();
   expect(pageContent).toContain("Logout");
 
-  // Find and click the logout button
-  await page.click('button:has-text("Logout")');
+  // Find and click the logout button (use desktop version which is visible)
+  await page.click('[data-testid="logout-desktop"]');
 
   // Verify we're back at the login page
   await page.waitForTimeout(1000);

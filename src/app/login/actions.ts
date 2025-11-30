@@ -78,9 +78,13 @@ async function _loginAction(
       .where(eq(users.email, email));
   }
 
-  // Set session cookie
+  // Set session cookie with both email and ID
   const cookieStore = await cookies();
-  cookieStore.set("session_user", user.email ?? "", { path: "/" });
+  const sessionData = JSON.stringify({
+    email: user.email,
+    id: user.id,
+  });
+  cookieStore.set("session_user", sessionData, { path: "/" });
 
   // Note: Sentry.setUser() is called on the client-side after successful login via SentryProvider
 

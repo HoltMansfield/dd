@@ -23,7 +23,7 @@ export default function NavBarClient({ currentUser }: NavBarClientProps) {
       <div className="flex justify-between lg:w-auto w-full lg:border-b-0 pl-6 pr-2 pb-1 lg:pb-0">
         <div className="flex items-center flex-shrink-0 text-gray-800 mr-16">
           <span className="font-semibold text-base tracking-tight text-slate-200">
-            Class Action Camping World
+            Deal Decoder
           </span>
         </div>
         <div className="block lg:hidden">

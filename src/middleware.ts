@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
 // require authentication
-const protectedPaths = ["/secure-page", "/dashboard", "/profile", "/settings"];
+const protectedPaths = [
+  "/secure-page",
+  "/dashboard",
+  "/profile",
+  "/settings",
+  "/documents",
+];
 
 // no auth required
 const authPaths = ["/login", "/register"];

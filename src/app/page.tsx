@@ -9,16 +9,6 @@ export default async function Home() {
           <CardTitle>Welcome, camper!</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-2 pt-0">
-          <div className="relative w-full h-96 rounded-md overflow-hidden flex justify-center items-center">
-            <Image
-              src="/images/brokie.png"
-              alt="Unhappy camper"
-              className="object-contain"
-              priority
-              width={420}
-              height={562}
-            />
-          </div>
           <p>
             We connect unhappy campers with law firms looking to organize class
             action lawsuits.

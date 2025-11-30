@@ -3,6 +3,9 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   experimental: {
     serverSourceMaps: true,
+    serverActions: {
+      bodySizeLimit: "50mb", // Allow 50MB file uploads
+    },
   },
   async headers() {
     return [
@@ -19,7 +22,7 @@ const nextConfig: NextConfig = {
               "font-src 'self' data: https://fonts.gstatic.com",
               "connect-src *",
               "worker-src 'self' blob: data:",
-            ].join("; ")
+            ].join("; "),
           },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "X-Content-Type-Options", value: "nosniff" },

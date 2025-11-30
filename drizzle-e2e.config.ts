@@ -5,6 +5,6 @@ export default {
   out: "./drizzle/migrations",
   dialect: "postgresql",
   dbCredentials: {
-    url: 'postgresql://test:test@localhost:5433/testdb-dd',
+    url: "postgresql://test:test@localhost:5433/testdb-dd",
   },
 } satisfies Config;

@@ -1,0 +1,172 @@
+"use client";
+
+import { useState } from "react";
+import { uploadDocument } from "@/actions/documents";
+import { Upload, FileText, Loader2 } from "lucide-react";
+
+export default function DocumentUpload({
+  onUploadSuccess,
+}: {
+  onUploadSuccess?: () => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      setError(null);
+      setSuccess(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(false);
+
+    if (!selectedFile) {
+      setError("Please select a file");
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const form = e.currentTarget;
+      const formData = new FormData(form);
+      const result = await uploadDocument(formData);
+
+      if (result.success) {
+        setSuccess(true);
+        setSelectedFile(null);
+        // Reset form
+        form.reset();
+        // Call callback if provided
+        if (onUploadSuccess) {
+          onUploadSuccess();
+        }
+      } else {
+        setError(result.error || "Upload failed");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred");
+      console.error(err);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="w-full max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
+      <div className="flex items-center gap-2 mb-4">
+        <Upload className="w-6 h-6 text-blue-600" />
+        <h2 className="text-2xl font-bold text-gray-800">Upload Document</h2>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* File Input */}
+        <div>
+          <label
+            htmlFor="file"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Select File
+          </label>
+          <div className="relative">
+            <input
+              type="file"
+              id="file"
+              name="file"
+              onChange={handleFileChange}
+              accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.xlsx,.xls,.csv,.doc,.docx"
+              className="block w-full text-sm text-gray-500
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-md file:border-0
+                file:text-sm file:font-semibold
+                file:bg-blue-50 file:text-blue-700
+                hover:file:bg-blue-100
+                cursor-pointer"
+              disabled={uploading}
+              required
+            />
+          </div>
+          {selectedFile && (
+            <div className="mt-2 flex items-center gap-2 text-sm text-gray-600">
+              <FileText className="w-4 h-4" />
+              <span>{selectedFile.name}</span>
+              <span className="text-gray-400">
+                ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+              </span>
+            </div>
+          )}
+          <p className="mt-1 text-xs text-gray-500">
+            Accepted: PDF, Images, Excel, Word, CSV (Max 50MB)
+          </p>
+        </div>
+
+        {/* Description (Optional) */}
+        <div>
+          <label
+            htmlFor="description"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Description (Optional)
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            rows={3}
+            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm
+              focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            placeholder="Add a description for this document..."
+            disabled={uploading}
+          />
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-sm text-red-800">{error}</p>
+          </div>
+        )}
+
+        {/* Success Message */}
+        {success && (
+          <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+            <p className="text-sm text-green-800">
+              Document uploaded successfully!
+            </p>
+          </div>
+        )}
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={uploading || !selectedFile}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2 
+            bg-blue-600 text-white font-medium rounded-md
+            hover:bg-blue-700 focus:outline-none focus:ring-2 
+            focus:ring-offset-2 focus:ring-blue-500
+            disabled:bg-gray-400 disabled:cursor-not-allowed
+            transition-colors"
+        >
+          {uploading ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Uploading...
+            </>
+          ) : (
+            <>
+              <Upload className="w-5 h-5" />
+              Upload Document
+            </>
+          )}
+        </button>
+      </form>
+    </div>
+  );
+}

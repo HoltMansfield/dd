@@ -9,17 +9,6 @@ This application uses a **hybrid storage approach**:
 
 ## Database Schema
 
-### `src/db/schema.ts` - All Tables
-
-**Purpose**: All application data in one place
-
-Tables:
-
-- `users` - User accounts
-- `sessions` - User sessions
-- `verificationTokens` - Email verification tokens
-- `documents` - File metadata (filename, size, path, user ownership)
-
 **Important**: The `documents` table is stored in **Neon DB**. It only contains metadata about files that are physically stored in Supabase Storage.
 
 ## Data Flow

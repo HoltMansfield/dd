@@ -16,7 +16,7 @@ try {
   console.log("Creating Sentry release...");
   const release = execSync("sentry-cli releases propose-version")
     .toString()
-    .trim();g
+    .trim();
 
   execSync(
     `sentry-cli releases new "${release}" --org ${SENTRY_ORG} --project ${SENTRY_PROJECT}`,

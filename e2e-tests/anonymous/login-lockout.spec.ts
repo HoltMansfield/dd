@@ -137,7 +137,7 @@ test.describe("Account lockout functionality", () => {
     }
 
     // Verify we're on the home page by checking for the logout button
-    await expect(page.locator('button:text("Logout")')).toBeVisible({
+    await expect(page.locator('[data-testid="logout-desktop"]')).toBeVisible({
       timeout: 10000,
     });
   });
@@ -199,12 +199,12 @@ test.describe("Account lockout functionality", () => {
     }
 
     // Verify we're on the home page by checking for the logout button
-    await expect(page.locator('button:text("Logout")')).toBeVisible({
+    await expect(page.locator('[data-testid="logout-desktop"]')).toBeVisible({
       timeout: 10000,
     });
 
     // Logout
-    await page.click('button:text("Logout")');
+    await page.click('[data-testid="logout-desktop"]');
     await page.waitForTimeout(1000);
 
     // Ensure we're on the login page

@@ -61,16 +61,15 @@
    ```
 4. Update sender email in `src/actions/emails.tsx` if needed
 
-### Error Monitoring (Highlight)
+### Error Monitoring (Sentry)
 
-1. Create a [Highlight](https://highlight.io/) account
+1. Create a [Sentry](https://sentry.io/) account
 2. Create a new project
-3. Get your API key
-4. Update `.env.local` with your Highlight API key:
+3. Get your DSN (Data Source Name)
+4. Update `.env.local` with your Sentry DSN:
    ```
-   HIGHLIGHT_API_KEY=your_highlight_api_key
+   SENTRY_DSN=your_sentry_dsn
    ```
-5. Update the project ID in `src/highlight-error.ts` if needed
 
 ## Step 4: Update E2E Testing Configuration
 
@@ -302,7 +301,7 @@ NODE_VERSION=20
 NEXT_PUBLIC_APP_ENV=PRODUCTION
 DB_URL=postgresql://[your-neon-connection-string]
 RESEND_API_KEY=re_[your-resend-api-key]
-HIGHLIGHT_API_KEY=[your-highlight-api-key]
+SENTRY_DSN=[your-sentry-dsn]
 MIGRATIONS_PATH=./drizzle/migrations
 ```
 

@@ -5,7 +5,7 @@ Email service:
 https://resend.com/
 
 ERROR LOGGING:
-https://app.highlight.io/
+https://sentry.io/
 
 NETLIFY (deployment):
 https://app.netlify.com/

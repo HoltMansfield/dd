@@ -5,10 +5,12 @@ Overview of all third-party services and libraries integrated into this applicat
 ## Database and ORM
 
 - **Neon Database**: Serverless PostgreSQL database service
+
   - Connected via `@neondatabase/serverless` for the web environment
   - Uses connection pooling for efficient database connections
 
 - **Drizzle ORM (v0.43.1)**: TypeScript ORM for SQL databases
+
   - Used for database schema definition, migrations, and queries
   - `drizzle-kit` for migrations, schema generation, and database management
   - Separate configurations for web and E2E testing environments
@@ -19,20 +21,23 @@ Overview of all third-party services and libraries integrated into this applicat
 ## Authentication
 
 - **bcryptjs (v3.0.2)**: Library for password hashing and verification
+
   - Used for secure password storage and validation
   - Implements account lockout functionality after failed login attempts
 
-- **Custom Cookie-based Authentication**: 
+- **Custom Cookie-based Authentication**:
   - Uses Next.js cookies API for session management
   - No JWT or third-party auth provider dependency
 
 ## UI Framework and Components
 
 - **Tailwind CSS (v4)**: Utility-first CSS framework
+
   - Used for responsive design and styling
   - `tailwind-merge` for combining Tailwind classes
 
 - **Radix UI**: Unstyled, accessible UI components
+
   - `@radix-ui/react-slot` for component composition
   - `@radix-ui/themes` for theming capabilities
 
@@ -43,6 +48,7 @@ Overview of all third-party services and libraries integrated into this applicat
 ## Form Handling
 
 - **React Hook Form (v7.56.4)**: Form state management and validation
+
   - Used for all form interactions in the application
   - `@hookform/resolvers` for schema validation integration
 
@@ -52,6 +58,7 @@ Overview of all third-party services and libraries integrated into this applicat
 ## Email Services
 
 - **Resend**: Email delivery service
+
   - Used for sending transactional emails
   - Integrated with React Email components
 
@@ -60,14 +67,15 @@ Overview of all third-party services and libraries integrated into this applicat
 
 ## Monitoring and Error Tracking
 
-- **Highlight (v7.9.23)**: Error tracking and monitoring service
-  - `@highlight-run/next` for Next.js integration
-  - `@highlight-run/node` for server-side error tracking
-  - Custom error wrapper (`withHighlightError`) for server actions
+- **Sentry**: Error tracking and monitoring service
+  - `@sentry/nextjs` for Next.js integration
+  - Server-side, client-side, and edge runtime error tracking
+  - Automatic error capture and performance monitoring
 
 ## Testing
 
 - **Playwright (v1.52.0)**: End-to-end testing framework
+
   - Configured for both anonymous and logged-in user flows
   - Separate E2E database configuration
 
@@ -79,6 +87,7 @@ Overview of all third-party services and libraries integrated into this applicat
 - **TypeScript (v5.8.3)**: Static type checking
 
 - **ESLint (v9)**: Code linting
+
   - With Next.js and accessibility plugins
 
 - **dotenv**: Environment variable management

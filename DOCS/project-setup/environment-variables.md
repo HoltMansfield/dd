@@ -13,9 +13,9 @@ The project uses different environment files for different contexts:
 
 ### Application Environment
 
-| Variable                | Description                                | Used In                                                          |
-| ----------------------- | ------------------------------------------ | ---------------------------------------------------------------- |
-| `NEXT_PUBLIC_APP_ENV`   | Determines the current runtime environment | Database connection selection, conditional logic for E2E testing |
+| Variable              | Description                                | Used In                                                          |
+| --------------------- | ------------------------------------------ | ---------------------------------------------------------------- |
+| `NEXT_PUBLIC_APP_ENV` | Determines the current runtime environment | Database connection selection, conditional logic for E2E testing |
 
 Possible values:
 
@@ -37,9 +37,9 @@ Possible values:
 
 ### Error Tracking
 
-| Variable            | Description                             | Used In                       |
-| ------------------- | --------------------------------------- | ----------------------------- |
-| `HIGHLIGHT_API_KEY` | API key for Highlight.io error tracking | Error tracking and monitoring |
+| Variable     | Description                   | Used In                       |
+| ------------ | ----------------------------- | ----------------------------- |
+| `SENTRY_DSN` | Sentry DSN for error tracking | Error tracking and monitoring |
 
 ### Testing
 

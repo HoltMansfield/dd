@@ -1,6 +1,6 @@
 # Netlify configuration for Next.js SSR
 [build]
-  command = "npm run build"
+  command = "npm run build:withMaps"
   publish = ".next"
 
 [functions]

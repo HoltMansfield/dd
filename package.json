@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
+    "build:withMaps": "next build && npm run sentry:sourcemaps",
+    "sentry:sourcemaps": "node scripts/upload-sentry-sourcemaps.cjs",
     "start": "next start",
     "lint": "next lint",
     "test:e2e": "run-s start:e2e-db db:create-schema build:e2e _test:e2e:with-app stop:e2e-db",

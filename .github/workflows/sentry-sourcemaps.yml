@@ -14,7 +14,7 @@ jobs:
       NEXT_PUBLIC_APP_ENV: CI
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
       SENTRY_ORG: holt-mansfield-2h
-      SENTRY_PROJECT: deal-decoder
+      SENTRY_PROJECT: dd
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

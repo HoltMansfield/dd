@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
-    "build:production": "next build && npm run sentry:sourcemaps",
+    "build:withMaps": "next build && npm run sentry:sourcemaps",
     "sentry:sourcemaps": "node scripts/upload-sentry-sourcemaps.cjs",
     "start": "next start",
     "lint": "next lint",

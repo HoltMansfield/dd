@@ -88,6 +88,24 @@ export const auditLogArchives = pgTable("auditLogArchives", {
   checksum: text("checksum"), // SHA-256 checksum for integrity verification
 });
 
+// Document permissions table for RBAC and document sharing
+// Enables users to share documents with specific permission levels
+export const documentPermissions = pgTable("documentPermissions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  documentId: uuid("documentId")
+    .notNull()
+    .references(() => documents.id, { onDelete: "cascade" }),
+  userId: uuid("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  permissionLevel: text("permissionLevel").notNull(), // 'owner', 'editor', 'viewer'
+  grantedBy: uuid("grantedBy")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  grantedAt: timestamp("grantedAt", { mode: "date" }).notNull().defaultNow(),
+  expiresAt: timestamp("expiresAt", { mode: "date" }), // optional: time-limited sharing
+});
+
 // Types for new records (for insertion)
 export type NewUser = InferInsertModel<typeof users>;
 export type NewSession = InferInsertModel<typeof sessions>;
@@ -95,6 +113,9 @@ export type NewVerificationToken = InferInsertModel<typeof verificationTokens>;
 export type NewDocument = InferInsertModel<typeof documents>;
 export type NewAuditLog = InferInsertModel<typeof auditLogs>;
 export type NewAuditLogArchive = InferInsertModel<typeof auditLogArchives>;
+export type NewDocumentPermission = InferInsertModel<
+  typeof documentPermissions
+>;
 
 // Types for existing records (from database)
 export type User = InferSelectModel<typeof users>;
@@ -103,6 +124,18 @@ export type VerificationToken = InferSelectModel<typeof verificationTokens>;
 export type Document = InferSelectModel<typeof documents>;
 export type AuditLog = InferSelectModel<typeof auditLogs>;
 export type AuditLogArchive = InferSelectModel<typeof auditLogArchives>;
+export type DocumentPermission = InferSelectModel<typeof documentPermissions>;
+
+// Permission levels for RBAC
+export type PermissionLevel = "owner" | "editor" | "viewer";
 
 // Audit log action types for type safety
-export type AuditAction = "upload" | "download" | "delete" | "view" | "list";
+export type AuditAction =
+  | "upload"
+  | "download"
+  | "delete"
+  | "view"
+  | "list"
+  | "share"
+  | "revoke"
+  | "access_denied";

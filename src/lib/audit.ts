@@ -11,7 +11,7 @@ type AuditLogParams = {
   documentId?: string;
   success?: boolean;
   errorMessage?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, string | number | boolean>;
 };
 
 /**

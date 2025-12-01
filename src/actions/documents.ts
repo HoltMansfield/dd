@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 import { db } from "@/db/connect";
 import { documents } from "@/db/schema";
 import { getCurrentUserId } from "./auth";
+import { createAuditLog } from "@/lib/audit";
 import { eq, and } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
@@ -44,15 +45,15 @@ export async function uploadDocument(
     !!process.env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  try {
-    // Get current user ID
-    const userId = await getCurrentUserId();
-    console.log("[uploadDocument] User ID:", userId);
-    if (!userId) {
-      console.log("[uploadDocument] ERROR: No user ID found");
-      return { success: false, error: "Unauthorized. Please log in." };
-    }
+  // Get current user ID outside try block so it's accessible in catch
+  const userId = await getCurrentUserId();
+  console.log("[uploadDocument] User ID:", userId);
+  if (!userId) {
+    console.log("[uploadDocument] ERROR: No user ID found");
+    return { success: false, error: "Unauthorized. Please log in." };
+  }
 
+  try {
     // Get file from form data
     const file = formData.get("file") as File;
     console.log(
@@ -149,6 +150,19 @@ export async function uploadDocument(
     );
     console.log("[uploadDocument] Upload process completed successfully");
 
+    // Create audit log for successful upload
+    await createAuditLog({
+      userId,
+      action: "upload",
+      documentId: document.id,
+      success: true,
+      metadata: {
+        fileName: file.name,
+        fileSize: file.size,
+        mimeType: file.type,
+      },
+    });
+
     return {
       success: true,
       documentId: document.id,
@@ -159,6 +173,18 @@ export async function uploadDocument(
       "[uploadDocument] Error stack:",
       error instanceof Error ? error.stack : "No stack trace"
     );
+
+    // Create audit log for failed upload
+    if (userId) {
+      await createAuditLog({
+        userId,
+        action: "upload",
+        success: false,
+        errorMessage:
+          error instanceof Error ? error.message : "Unknown error occurred",
+      });
+    }
+
     return {
       success: false,
       error: "An unexpected error occurred during upload",
@@ -198,12 +224,49 @@ export async function getDocumentDownloadUrl(
 
     if (error) {
       console.error("Error creating signed URL:", error);
+
+      // Create audit log for failed download
+      await createAuditLog({
+        userId,
+        action: "download",
+        documentId,
+        success: false,
+        errorMessage: error.message || "Failed to generate download URL",
+      });
+
       return { success: false, error: "Failed to generate download URL" };
     }
+
+    // Create audit log for successful download
+    await createAuditLog({
+      userId,
+      action: "download",
+      documentId,
+      success: true,
+      metadata: {
+        fileName: document.fileName,
+      },
+    });
 
     return { success: true, url: data.signedUrl };
   } catch (error) {
     console.error("Get download URL error:", error);
+
+    // Create audit log for failed download
+    const userId = await getCurrentUserId();
+    if (userId) {
+      await createAuditLog({
+        userId,
+        action: "download",
+        documentId,
+        success: false,
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred",
+      });
+    }
+
     return { success: false, error: "An unexpected error occurred" };
   }
 }
@@ -267,9 +330,35 @@ export async function deleteDocument(
     // Delete metadata from DB
     await db.delete(documents).where(eq(documents.id, documentId));
 
+    // Create audit log for successful delete
+    await createAuditLog({
+      userId,
+      action: "delete",
+      documentId,
+      success: true,
+      metadata: {
+        fileName: document.fileName,
+        fileSize: document.fileSize,
+      },
+    });
+
     return { success: true };
   } catch (error) {
     console.error("Delete document error:", error);
+
+    // Create audit log for failed delete
+    const userId = await getCurrentUserId();
+    if (userId) {
+      await createAuditLog({
+        userId,
+        action: "delete",
+        documentId,
+        success: false,
+        errorMessage:
+          error instanceof Error ? error.message : "Failed to delete document",
+      });
+    }
+
     return { success: false, error: "Failed to delete document" };
   }
 }

@@ -54,14 +54,38 @@ export const documents = pgTable("documents", {
   description: text("description"),
 });
 
+// Audit logs table for SOC2 compliance
+// Tracks all file operations (upload, download, delete, view)
+export const auditLogs = pgTable("auditLogs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  documentId: uuid("documentId").references(() => documents.id, {
+    onDelete: "set null",
+  }), // null if document is deleted
+  action: text("action").notNull(), // 'upload', 'download', 'delete', 'view'
+  timestamp: timestamp("timestamp", { mode: "date" }).notNull().defaultNow(),
+  ipAddress: text("ipAddress"), // optional: track IP for security
+  userAgent: text("userAgent"), // optional: track user agent
+  metadata: text("metadata"), // optional: JSON string for additional context
+  success: integer("success").notNull().default(1), // 1 for success, 0 for failure
+  errorMessage: text("errorMessage"), // if success = 0, store error details
+});
+
 // Types for new records (for insertion)
 export type NewUser = InferInsertModel<typeof users>;
 export type NewSession = InferInsertModel<typeof sessions>;
 export type NewVerificationToken = InferInsertModel<typeof verificationTokens>;
 export type NewDocument = InferInsertModel<typeof documents>;
+export type NewAuditLog = InferInsertModel<typeof auditLogs>;
 
 // Types for existing records (from database)
 export type User = InferSelectModel<typeof users>;
 export type Session = InferSelectModel<typeof sessions>;
 export type VerificationToken = InferSelectModel<typeof verificationTokens>;
 export type Document = InferSelectModel<typeof documents>;
+export type AuditLog = InferSelectModel<typeof auditLogs>;
+
+// Audit log action types for type safety
+export type AuditAction = "upload" | "download" | "delete" | "view" | "list";

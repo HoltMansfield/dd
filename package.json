@@ -26,9 +26,10 @@
     "e2e:migrate": "node scripts/drizzle-e2e.cjs migrate",
     "build:e2e": "dotenv -e .env.e2e -- next build",
     "e2e:start": "dotenv -e .env.e2e -- next start --port 3001",
-    "e2e:test": "npx wait-on http://localhost:3001 && dotenv -e .env.e2e -- playwright test --project=anonymous --project=logged-in",
+    "e2e:test": "npx wait-on http://localhost:3001 && dotenv -e .env.e2e -- playwright test --project=anonymous --project=logged-in --project=rbac",
     "e2e:test:anonymous": "npx wait-on http://localhost:3001 && dotenv -e .env.e2e -- playwright test --project=anonymous",
     "e2e:test:logged-in": "npx wait-on http://localhost:3001 && dotenv -e .env.e2e -- playwright test --project=logged-in",
+    "e2e:test:rbac": "npx wait-on http://localhost:3001 && dotenv -e .env.e2e -- playwright test --project=rbac",
     "archive:audit-logs": "dotenv -e .env.local -- npx tsx scripts/archive-audit-logs.ts",
     "audit:stats": "dotenv -e .env.local -- npx tsx -e \"import { getAuditLogStats } from './src/lib/audit'; getAuditLogStats().then(console.log)\""
   },

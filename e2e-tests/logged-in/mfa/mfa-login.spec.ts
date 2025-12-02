@@ -21,8 +21,9 @@ const TEST_BACKUP_CODES = ["TESTCODE1", "TESTCODE2", "TESTCODE3"];
 test.describe("MFA - Login Flow", () => {
   test.beforeAll(async () => {
     // Create test user
-    const { db } = await import("../../src/db/connect");
-    const { users } = await import("../../src/db/schema");
+    const { db } = await import("../../../src/db/connect");
+    const { users } = await import("../../../src/db/schema");
+    const { eq } = await import("drizzle-orm");
     const bcrypt = await import("bcryptjs");
 
     const passwordHash = await bcrypt.hash(TEST_USER.password, 10);
@@ -42,8 +43,8 @@ test.describe("MFA - Login Flow", () => {
 
   test.afterAll(async () => {
     // Clean up test user
-    const { db } = await import("../../src/db/connect");
-    const { users } = await import("../../src/db/schema");
+    const { db } = await import("../../../src/db/connect");
+    const { users } = await import("../../../src/db/schema");
     const { eq } = await import("drizzle-orm");
 
     await db.delete(users).where(eq(users.id, testUserId));
@@ -52,7 +53,10 @@ test.describe("MFA - Login Flow", () => {
 
   test.beforeEach(async () => {
     // Ensure MFA is disabled before each test
-    await disableMFAForTestUser(testUserId);
+    const { db } = await import("../../../src/db/connect");
+    const { users } = await import("../../../src/db/schema");
+    const { eq } = await import("drizzle-orm");
+    await disableMFAForTestUser(db, users, eq, testUserId);
   });
 
   test("should login normally without MFA", async ({ page }) => {
@@ -76,7 +80,7 @@ test.describe("MFA - Login Flow", () => {
     console.log("[Test] Login with MFA - redirect to verification");
 
     // Enable MFA for test user
-    await enableMFAForTestUser(testUserId, TEST_SECRET, TEST_BACKUP_CODES);
+    const { db } = await import("../../../src/db/connect"); const { users } = await import("../../../src/db/schema"); const { eq } = await import("drizzle-orm"); await enableMFAForTestUser(db, users, eq, testUserId, TEST_SECRET, TEST_BACKUP_CODES);
 
     await page.goto("/login");
 
@@ -98,7 +102,7 @@ test.describe("MFA - Login Flow", () => {
     console.log("[Test] Login with valid TOTP code");
 
     // Enable MFA for test user
-    await enableMFAForTestUser(testUserId, TEST_SECRET, TEST_BACKUP_CODES);
+    const { db } = await import("../../../src/db/connect"); const { users } = await import("../../../src/db/schema"); const { eq } = await import("drizzle-orm"); await enableMFAForTestUser(db, users, eq, testUserId, TEST_SECRET, TEST_BACKUP_CODES);
 
     await page.goto("/login");
 
@@ -127,7 +131,7 @@ test.describe("MFA - Login Flow", () => {
     console.log("[Test] Reject invalid TOTP code");
 
     // Enable MFA for test user
-    await enableMFAForTestUser(testUserId, TEST_SECRET, TEST_BACKUP_CODES);
+    const { db } = await import("../../../src/db/connect"); const { users } = await import("../../../src/db/schema"); const { eq } = await import("drizzle-orm"); await enableMFAForTestUser(db, users, eq, testUserId, TEST_SECRET, TEST_BACKUP_CODES);
 
     await page.goto("/login");
 
@@ -155,7 +159,7 @@ test.describe("MFA - Login Flow", () => {
     console.log("[Test] Login with backup code");
 
     // Enable MFA for test user
-    await enableMFAForTestUser(testUserId, TEST_SECRET, TEST_BACKUP_CODES);
+    const { db } = await import("../../../src/db/connect"); const { users } = await import("../../../src/db/schema"); const { eq } = await import("drizzle-orm"); await enableMFAForTestUser(db, users, eq, testUserId, TEST_SECRET, TEST_BACKUP_CODES);
 
     await page.goto("/login");
 
@@ -183,10 +187,10 @@ test.describe("MFA - Login Flow", () => {
     console.log("[Test] Invalidate used backup code");
 
     // Enable MFA for test user
-    await enableMFAForTestUser(testUserId, TEST_SECRET, TEST_BACKUP_CODES);
+    const { db } = await import("../../../src/db/connect"); const { users } = await import("../../../src/db/schema"); const { eq } = await import("drizzle-orm"); await enableMFAForTestUser(db, users, eq, testUserId, TEST_SECRET, TEST_BACKUP_CODES);
 
     // Check initial backup codes count
-    const initialCount = await getBackupCodesCount(testUserId);
+    const initialCount = const { db } = await import("../../../src/db/connect"); const { users } = await import("../../../src/db/schema"); const { eq } = await import("drizzle-orm"); await getBackupCodesCount(db, users, eq, testUserId);
     expect(initialCount).toBe(3);
     console.log(`Initial backup codes: ${initialCount}`);
 
@@ -203,7 +207,7 @@ test.describe("MFA - Login Flow", () => {
     await expect(page).toHaveURL("/");
 
     // Check backup codes count after use
-    const afterCount = await getBackupCodesCount(testUserId);
+    const afterCount = const { db } = await import("../../../src/db/connect"); const { users } = await import("../../../src/db/schema"); const { eq } = await import("drizzle-orm"); await getBackupCodesCount(db, users, eq, testUserId);
     expect(afterCount).toBe(2);
     console.log(`✓ Backup codes after use: ${afterCount}`);
 
@@ -229,7 +233,7 @@ test.describe("MFA - Login Flow", () => {
     console.log("[Test] Skip MFA in LOCAL environment");
 
     // Enable MFA for test user
-    await enableMFAForTestUser(testUserId, TEST_SECRET, TEST_BACKUP_CODES);
+    const { db } = await import("../../../src/db/connect"); const { users } = await import("../../../src/db/schema"); const { eq } = await import("drizzle-orm"); await enableMFAForTestUser(db, users, eq, testUserId, TEST_SECRET, TEST_BACKUP_CODES);
 
     await page.goto("/login");
 
@@ -258,7 +262,7 @@ test.describe("MFA - Login Flow", () => {
     console.log("[Test] Handle expired MFA session");
 
     // Enable MFA for test user
-    await enableMFAForTestUser(testUserId, TEST_SECRET, TEST_BACKUP_CODES);
+    const { db } = await import("../../../src/db/connect"); const { users } = await import("../../../src/db/schema"); const { eq } = await import("drizzle-orm"); await enableMFAForTestUser(db, users, eq, testUserId, TEST_SECRET, TEST_BACKUP_CODES);
 
     await page.goto("/login");
 

@@ -47,7 +47,7 @@ test.describe("MFA - Setup and Management", () => {
 
   test.beforeEach(async ({ page }) => {
     // Ensure MFA is disabled and user is logged in
-    await disableMFAForTestUser(testUserId);
+    const { db } = await import("../../../src/db/connect"); const { users } = await import("../../../src/db/schema"); const { eq } = await import("drizzle-orm"); await disableMFAForTestUser(db, users, eq, testUserId);
 
     // Login
     await page.goto("/login");
@@ -170,10 +170,10 @@ test.describe("MFA - Setup and Management", () => {
     const { enableMFAForTestUser } = await import(
       "../../fixtures/mfa-test-helpers"
     );
-    await enableMFAForTestUser(testUserId);
+    const { db } = await import("../../../src/db/connect"); const { users } = await import("../../../src/db/schema"); const { eq } = await import("drizzle-orm"); await enableMFAForTestUser(db, users, eq, testUserId);
 
     // Verify in database
-    const isEnabled = await checkMFAStatus(testUserId);
+    const isEnabled = const { db } = await import("../../../src/db/connect"); const { users } = await import("../../../src/db/schema"); const { eq } = await import("drizzle-orm"); await checkMFAStatus(db, users, eq, testUserId);
     expect(isEnabled).toBe(true);
 
     await page.goto("/settings/security");
@@ -196,7 +196,7 @@ test.describe("MFA - Setup and Management", () => {
     const { enableMFAForTestUser } = await import(
       "../../fixtures/mfa-test-helpers"
     );
-    await enableMFAForTestUser(testUserId);
+    const { db } = await import("../../../src/db/connect"); const { users } = await import("../../../src/db/schema"); const { eq } = await import("drizzle-orm"); await enableMFAForTestUser(db, users, eq, testUserId);
 
     await page.goto("/settings/security");
 
@@ -218,7 +218,7 @@ test.describe("MFA - Setup and Management", () => {
     console.log("✓ MFA disabled successfully");
 
     // Verify in database
-    const isEnabled = await checkMFAStatus(testUserId);
+    const isEnabled = const { db } = await import("../../../src/db/connect"); const { users } = await import("../../../src/db/schema"); const { eq } = await import("drizzle-orm"); await checkMFAStatus(db, users, eq, testUserId);
     expect(isEnabled).toBe(false);
   });
 
@@ -229,7 +229,7 @@ test.describe("MFA - Setup and Management", () => {
     const { enableMFAForTestUser } = await import(
       "../../fixtures/mfa-test-helpers"
     );
-    await enableMFAForTestUser(testUserId);
+    const { db } = await import("../../../src/db/connect"); const { users } = await import("../../../src/db/schema"); const { eq } = await import("drizzle-orm"); await enableMFAForTestUser(db, users, eq, testUserId);
 
     await page.goto("/settings/security");
 
@@ -245,7 +245,7 @@ test.describe("MFA - Setup and Management", () => {
     console.log("✓ Wrong password rejected");
 
     // MFA should still be enabled
-    const isEnabled = await checkMFAStatus(testUserId);
+    const isEnabled = const { db } = await import("../../../src/db/connect"); const { users } = await import("../../../src/db/schema"); const { eq } = await import("drizzle-orm"); await checkMFAStatus(db, users, eq, testUserId);
     expect(isEnabled).toBe(true);
   });
 
@@ -256,7 +256,7 @@ test.describe("MFA - Setup and Management", () => {
     const { enableMFAForTestUser } = await import(
       "../../fixtures/mfa-test-helpers"
     );
-    await enableMFAForTestUser(testUserId);
+    const { db } = await import("../../../src/db/connect"); const { users } = await import("../../../src/db/schema"); const { eq } = await import("drizzle-orm"); await enableMFAForTestUser(db, users, eq, testUserId);
 
     await page.goto("/settings/security");
 
@@ -276,7 +276,7 @@ test.describe("MFA - Setup and Management", () => {
     console.log("✓ Disable canceled successfully");
 
     // Verify MFA still enabled
-    const isEnabled = await checkMFAStatus(testUserId);
+    const isEnabled = const { db } = await import("../../../src/db/connect"); const { users } = await import("../../../src/db/schema"); const { eq } = await import("drizzle-orm"); await checkMFAStatus(db, users, eq, testUserId);
     expect(isEnabled).toBe(true);
   });
 

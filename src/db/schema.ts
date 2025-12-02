@@ -5,6 +5,7 @@ import {
   uuid,
   primaryKey,
   integer,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { InferInsertModel, InferSelectModel } from "drizzle-orm";
 
@@ -17,6 +18,10 @@ export const users = pgTable("users", {
   image: text("image"),
   failedLoginAttempts: integer("failedLoginAttempts").default(0),
   lockoutUntil: timestamp("lockoutUntil", { mode: "date" }),
+  // MFA/TOTP fields
+  mfaEnabled: boolean("mfaEnabled").default(false),
+  mfaSecret: text("mfaSecret"), // Encrypted TOTP secret
+  mfaBackupCodes: text("mfaBackupCodes"), // JSON array of hashed backup codes
 });
 
 export const sessions = pgTable("sessions", {
@@ -138,4 +143,11 @@ export type AuditAction =
   | "list"
   | "share"
   | "revoke"
-  | "access_denied";
+  | "access_denied"
+  | "mfa_setup_initiated"
+  | "mfa_setup_failed"
+  | "mfa_enabled"
+  | "mfa_disabled"
+  | "mfa_verification"
+  | "mfa_backup_code_used"
+  | "mfa_disable_failed";

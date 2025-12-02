@@ -103,6 +103,12 @@ export default function NavBarClient({ currentUser }: NavBarClientProps) {
             <span className="block text-md px-4 py-2 text-slate-200 mt-4 lg:mt-0">
               Welcome, {currentUser}
             </span>
+            <Link
+              href="/settings/security"
+              className="block text-md px-4 ml-2 py-2 rounded text-slate-200 font-bold hover:bg-slate-950 mt-4 lg:mt-0"
+            >
+              Security
+            </Link>
             <button
               onClick={handleLogout}
               data-testid={isMobile ? "logout-mobile" : "logout-desktop"}

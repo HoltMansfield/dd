@@ -16,8 +16,8 @@ let testUserId: string;
 test.describe("MFA - Setup and Management", () => {
   test.beforeAll(async () => {
     // Create test user
-    const { db } = await import("../../src/db/connect");
-    const { users } = await import("../../src/db/schema");
+    const { db } = await import("../../../src/db/connect");
+    const { users } = await import("../../../src/db/schema");
     const bcrypt = await import("bcryptjs");
 
     const passwordHash = await bcrypt.hash(TEST_USER.password, 10);
@@ -37,8 +37,8 @@ test.describe("MFA - Setup and Management", () => {
 
   test.afterAll(async () => {
     // Clean up test user
-    const { db } = await import("../../src/db/connect");
-    const { users } = await import("../../src/db/schema");
+    const { db } = await import("../../../src/db/connect");
+    const { users } = await import("../../../src/db/schema");
     const { eq } = await import("drizzle-orm");
 
     await db.delete(users).where(eq(users.id, testUserId));
@@ -182,7 +182,12 @@ test.describe("MFA - Setup and Management", () => {
     const { db: dbCheck } = await import("../../../src/db/connect");
     const { users: usersCheck } = await import("../../../src/db/schema");
     const { eq: eqCheck } = await import("drizzle-orm");
-    const isEnabled = await checkMFAStatus(dbCheck, usersCheck, eqCheck, testUserId);
+    const isEnabled = await checkMFAStatus(
+      dbCheck,
+      usersCheck,
+      eqCheck,
+      testUserId
+    );
     expect(isEnabled).toBe(true);
 
     await page.goto("/settings/security");
@@ -233,7 +238,12 @@ test.describe("MFA - Setup and Management", () => {
     const { db: dbCheck } = await import("../../../src/db/connect");
     const { users: usersCheck } = await import("../../../src/db/schema");
     const { eq: eqCheck } = await import("drizzle-orm");
-    const isEnabled = await checkMFAStatus(dbCheck, usersCheck, eqCheck, testUserId);
+    const isEnabled = await checkMFAStatus(
+      dbCheck,
+      usersCheck,
+      eqCheck,
+      testUserId
+    );
     expect(isEnabled).toBe(false);
   });
 
@@ -266,7 +276,12 @@ test.describe("MFA - Setup and Management", () => {
     const { db: dbCheck } = await import("../../../src/db/connect");
     const { users: usersCheck } = await import("../../../src/db/schema");
     const { eq: eqCheck } = await import("drizzle-orm");
-    const isEnabled = await checkMFAStatus(dbCheck, usersCheck, eqCheck, testUserId);
+    const isEnabled = await checkMFAStatus(
+      dbCheck,
+      usersCheck,
+      eqCheck,
+      testUserId
+    );
     expect(isEnabled).toBe(true);
   });
 
@@ -303,7 +318,12 @@ test.describe("MFA - Setup and Management", () => {
     const { db: dbCheck } = await import("../../../src/db/connect");
     const { users: usersCheck } = await import("../../../src/db/schema");
     const { eq: eqCheck } = await import("drizzle-orm");
-    const isEnabled = await checkMFAStatus(dbCheck, usersCheck, eqCheck, testUserId);
+    const isEnabled = await checkMFAStatus(
+      dbCheck,
+      usersCheck,
+      eqCheck,
+      testUserId
+    );
     expect(isEnabled).toBe(true);
   });
 

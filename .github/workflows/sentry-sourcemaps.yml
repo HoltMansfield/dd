@@ -8,7 +8,7 @@ on:
 
 jobs:
   upload-sourcemaps:
-    name: "upload-sourcemaps"
+    name: Upload Sentry Sourcemaps
     runs-on: ubuntu-latest
     environment: CI
     env:

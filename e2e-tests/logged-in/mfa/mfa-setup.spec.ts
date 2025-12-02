@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import {
   disableMFAForTestUser,
   checkMFAStatus,
-} from "../fixtures/mfa-test-helpers";
+} from "../../fixtures/mfa-test-helpers";
 
 // Test user credentials
 const TEST_USER = {
@@ -168,7 +168,7 @@ test.describe("MFA - Setup and Management", () => {
 
     // Enable MFA directly in database
     const { enableMFAForTestUser } = await import(
-      "../fixtures/mfa-test-helpers"
+      "../../fixtures/mfa-test-helpers"
     );
     await enableMFAForTestUser(testUserId);
 
@@ -194,7 +194,7 @@ test.describe("MFA - Setup and Management", () => {
 
     // Enable MFA first
     const { enableMFAForTestUser } = await import(
-      "../fixtures/mfa-test-helpers"
+      "../../fixtures/mfa-test-helpers"
     );
     await enableMFAForTestUser(testUserId);
 
@@ -227,7 +227,7 @@ test.describe("MFA - Setup and Management", () => {
 
     // Enable MFA first
     const { enableMFAForTestUser } = await import(
-      "../fixtures/mfa-test-helpers"
+      "../../fixtures/mfa-test-helpers"
     );
     await enableMFAForTestUser(testUserId);
 
@@ -254,7 +254,7 @@ test.describe("MFA - Setup and Management", () => {
 
     // Enable MFA first
     const { enableMFAForTestUser } = await import(
-      "../fixtures/mfa-test-helpers"
+      "../../fixtures/mfa-test-helpers"
     );
     await enableMFAForTestUser(testUserId);
 

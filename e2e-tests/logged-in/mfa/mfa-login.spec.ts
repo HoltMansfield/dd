@@ -5,7 +5,7 @@ import {
   disableMFAForTestUser,
   checkMFAStatus,
   getBackupCodesCount,
-} from "../fixtures/mfa-test-helpers";
+} from "../../fixtures/mfa-test-helpers";
 
 // Test user credentials
 const TEST_USER = {

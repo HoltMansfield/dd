@@ -101,7 +101,7 @@ test.describe("RBAC - Document Sharing", () => {
     }
 
     expect(permission).toBeDefined();
-    expect(permission.permissionLevel).toBe("editor");
+    expect(permission?.permissionLevel).toBe("editor");
   });
 
   test("non-owner cannot share document", async () => {

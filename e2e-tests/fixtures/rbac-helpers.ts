@@ -150,6 +150,9 @@ export async function createTestDocument(
  * Clean up test documents
  */
 export async function cleanupTestDocuments(ownerId: string): Promise<void> {
+  // Small delay to ensure all async operations (like audit logs) complete
+  await new Promise((resolve) => setTimeout(resolve, 150));
+
   const { db } = await import("../../src/db/connect");
   const { documents } = await import("../../src/db/schema");
   const { eq } = await import("drizzle-orm");

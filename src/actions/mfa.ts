@@ -54,7 +54,7 @@ export async function initializeMFASetup(): Promise<{
     }
 
     // Generate QR code
-    const qrCode = await generateQRCode(user.email, secret);
+    const qrCode = await generateQRCode(user.email, secret, "DD");
 
     await createAuditLog({
       userId,

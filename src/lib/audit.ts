@@ -6,13 +6,15 @@ import { eq, desc, lt, sql } from "drizzle-orm";
 import crypto from "crypto";
 
 // Conditionally import headers only in Next.js environment
-let headers: (() => Promise<Headers>) | null = null;
-try {
-  // @ts-ignore - Dynamic import for Next.js headers
-  headers = require("next/headers").headers;
-} catch (error) {
-  // Running in test environment without Next.js
-  headers = null;
+// Using dynamic import to avoid ESLint errors and support test environments
+async function getHeaders(): Promise<Headers | null> {
+  try {
+    const { headers } = await import("next/headers");
+    return await headers();
+  } catch {
+    // Running in test environment without Next.js
+    return null;
+  }
 }
 
 type AuditLogParams = {
@@ -38,23 +40,17 @@ export async function createAuditLog({
 }: AuditLogParams): Promise<void> {
   try {
     // Get request headers for IP and user agent
-    // In test environments, headers() may not be available
+    // In test environments, headers may not be available
     let ipAddress = "unknown";
     let userAgent = "unknown";
 
-    if (headers) {
-      try {
-        const headersList = await headers();
-        ipAddress =
-          headersList.get("x-forwarded-for") ||
-          headersList.get("x-real-ip") ||
-          "unknown";
-        userAgent = headersList.get("user-agent") || "unknown";
-      } catch (error) {
-        // Headers call failed
-        ipAddress = "unknown";
-        userAgent = "unknown";
-      }
+    const headersList = await getHeaders();
+    if (headersList) {
+      ipAddress =
+        headersList.get("x-forwarded-for") ||
+        headersList.get("x-real-ip") ||
+        "unknown";
+      userAgent = headersList.get("user-agent") || "unknown";
     } else {
       // Running in test environment without Next.js
       ipAddress = "test-environment";

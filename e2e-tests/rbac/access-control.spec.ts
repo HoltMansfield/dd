@@ -241,5 +241,14 @@ test.describe("RBAC - Access Control", () => {
 
     expect(auditLog).toBeDefined();
     expect(auditLog.success).toBe(0);
+    expect(auditLog.action).toBe("access_denied");
+    expect(auditLog.userId).toBe(testUsers.unauthorized.id);
+    expect(auditLog.documentId).toBe(testDocumentId);
+    expect(auditLog.errorMessage).toContain("permission");
+    expect(auditLog.metadata).toBeTruthy();
+
+    // Verify metadata contains the attempted action
+    const metadata = JSON.parse(auditLog.metadata!);
+    expect(metadata.attemptedAction).toBe("view");
   });
 });

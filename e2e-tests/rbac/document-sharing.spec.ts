@@ -158,7 +158,16 @@ test.describe("RBAC - Document Sharing", () => {
 
     expect(auditLog).toBeDefined();
     expect(auditLog.success).toBe(1);
-    expect(auditLog.metadata).toContain(testUsers.viewer.id);
+    expect(auditLog.action).toBe("share");
+    expect(auditLog.userId).toBe(testUsers.owner.id);
+    expect(auditLog.documentId).toBe(testDocumentId);
+    expect(auditLog.metadata).toBeTruthy();
+
+    // Verify metadata contains sharing details
+    const metadata = JSON.parse(auditLog.metadata!);
+    expect(metadata.sharedWith).toBe(testUsers.viewer.id);
+    expect(metadata.sharedWithEmail).toBe(testUsers.viewer.email);
+    expect(metadata.permission).toBe("viewer");
   });
 
   test("can update existing permission level", async () => {

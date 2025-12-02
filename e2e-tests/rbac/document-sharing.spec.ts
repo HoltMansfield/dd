@@ -43,6 +43,9 @@ test.describe("RBAC - Document Sharing", () => {
       "viewer"
     );
 
+    // Small delay to ensure database write is committed
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     // Verify permission was created
     const { db } = await import("../../src/db/connect");
     const { documentPermissions } = await import("../../src/db/schema");

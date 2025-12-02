@@ -1,7 +1,8 @@
 "use client";
 import { useForm, FormProvider } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { startTransition, useActionState } from "react";
+import { startTransition, useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { withSentryErrorClient } from "@/sentry-error";
 import { loginAction } from "./actions";
 import { schema, LoginFormInputs } from "./schema";
@@ -19,11 +20,19 @@ import {
 } from "@/components/ui/card";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [state, formAction, isPending] = useActionState(loginAction, undefined);
   const methods = useForm<LoginFormInputs>({
     resolver: yupResolver(schema),
   });
   const { handleSubmit } = methods;
+
+  // Redirect to MFA verification if required
+  useEffect(() => {
+    if (state?.requiresMFA && state?.userId) {
+      router.push(`/login/verify?userId=${state.userId}`);
+    }
+  }, [state, router]);
 
   const onSubmit = withSentryErrorClient(async (data: LoginFormInputs) => {
     startTransition(() => {

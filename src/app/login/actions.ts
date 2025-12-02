@@ -9,9 +9,24 @@ import { MAX_FAILED_ATTEMPTS, LOCKOUT_DURATION_MS } from "./constants";
 import { redirect } from "next/navigation";
 
 async function _loginAction(
-  state: { error?: string; success?: boolean } | undefined,
+  state:
+    | {
+        error?: string;
+        success?: boolean;
+        requiresMFA?: boolean;
+        userId?: string;
+      }
+    | undefined,
   data: { email: string; password: string }
-): Promise<{ error?: string; success?: boolean } | undefined> {
+): Promise<
+  | {
+      error?: string;
+      success?: boolean;
+      requiresMFA?: boolean;
+      userId?: string;
+    }
+  | undefined
+> {
   const { email, password } = data;
 
   // Find the user
@@ -76,6 +91,25 @@ async function _loginAction(
         lockoutUntil: null,
       })
       .where(eq(users.email, email));
+  }
+
+  // Check if user has MFA enabled
+  if (user.mfaEnabled) {
+    // Store temporary session data for MFA verification
+    const cookieStore = await cookies();
+    const tempSessionData = JSON.stringify({
+      userId: user.id,
+      email: user.email,
+      mfaPending: true,
+    });
+    cookieStore.set("mfa_pending", tempSessionData, {
+      path: "/",
+      maxAge: 300, // 5 minutes to complete MFA
+      httpOnly: true,
+    });
+
+    // Return MFA required state
+    return { requiresMFA: true, userId: user.id };
   }
 
   // Set session cookie with both email and ID

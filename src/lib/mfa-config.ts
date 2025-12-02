@@ -5,16 +5,16 @@
 
 /**
  * Check if MFA should be enforced
- * In LOCAL environment, MFA is always optional
+ * In PRODUCTION environment, MFA is always required
  */
 export function shouldEnforceMFA(): boolean {
   const env = process.env.NEXT_PUBLIC_APP_ENV;
-  return env !== "LOCAL";
+  return env === "PRODUCTION";
 }
 
 /**
  * Check if MFA is available for setup
- * MFA is available in all environments but optional in LOCAL
+ * MFA is optional in all environments but required in PRODUCTION
  */
 export function isMFAAvailable(): boolean {
   return true;
@@ -25,8 +25,8 @@ export function isMFAAvailable(): boolean {
  */
 export function getMFAEnforcementMessage(): string {
   const env = process.env.NEXT_PUBLIC_APP_ENV;
-  if (env === "LOCAL") {
-    return "Multi-factor authentication is optional in development mode.";
+  if (env !== "PRODUCTION") {
+    return "Multi-factor authentication is optional.";
   }
-  return "Multi-factor authentication is recommended for enhanced security.";
+  return "Multi-factor authentication is required.";
 }

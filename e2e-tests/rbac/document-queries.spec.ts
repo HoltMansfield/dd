@@ -19,6 +19,11 @@ test.describe("RBAC - Document Queries", () => {
   });
 
   test.beforeEach(async () => {
+    // Clean up any leftover documents first
+    await cleanupTestDocuments(testUsers.owner.id);
+    await cleanupTestDocuments(testUsers.viewer.id);
+    await cleanupTestDocuments(testUsers.editor.id);
+
     // Create multiple test documents
     const doc1 = await createTestDocument(testUsers.owner.id, "doc1.txt");
     const doc2 = await createTestDocument(testUsers.owner.id, "doc2.txt");
@@ -28,6 +33,8 @@ test.describe("RBAC - Document Queries", () => {
 
   test.afterEach(async () => {
     await cleanupTestDocuments(testUsers.owner.id);
+    await cleanupTestDocuments(testUsers.viewer.id);
+    await cleanupTestDocuments(testUsers.editor.id);
     testDocumentIds = [];
   });
 
@@ -97,9 +104,6 @@ test.describe("RBAC - Document Queries", () => {
 
     expect(result.shared.length).toBe(1);
     expect(result.shared[0].id).toBe(testDocumentIds[0]);
-
-    // Cleanup viewer's document
-    await cleanupTestDocuments(testUsers.viewer.id);
   });
 
   test("getDocumentSharedWith returns all users with access", async () => {

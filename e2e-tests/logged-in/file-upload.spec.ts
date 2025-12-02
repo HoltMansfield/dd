@@ -72,7 +72,7 @@ test.describe("File Upload", () => {
 
     // Verify the file appears in the documents list
     console.log("Checking if file appears in list...");
-    await expect(page.getByText("test-document.pdf")).toBeVisible({
+    await expect(page.getByText("test-document.pdf").first()).toBeVisible({
       timeout: 10000,
     });
     console.log("✓ File appears in documents list");

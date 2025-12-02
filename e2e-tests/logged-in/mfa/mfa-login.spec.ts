@@ -289,8 +289,10 @@ test.describe("MFA - Login Flow", () => {
     console.log("✓ Used backup code rejected");
   });
 
-  test("should allow skipping MFA in LOCAL environment", async ({ page }) => {
-    console.log("[Test] Skip MFA in LOCAL environment");
+  test("should allow skipping MFA in non-PRODUCTION environment", async ({
+    page,
+  }) => {
+    console.log("[Test] Skip MFA in non-PRODUCTION environment");
 
     // Enable MFA for test user
     const { db } = await import("../../../src/db/connect");
@@ -315,10 +317,10 @@ test.describe("MFA - Login Flow", () => {
     // Wait for MFA page
     await expect(page).toHaveURL(/\/login\/verify/);
 
-    // Should see skip button in LOCAL environment
+    // Should see skip button in non-PRODUCTION environment
     const skipButton = page.locator("text=Skip for now");
     await expect(skipButton).toBeVisible();
-    console.log("✓ Skip button visible in LOCAL environment");
+    console.log("✓ Skip button visible in non-PRODUCTION environment");
 
     // Click skip
     await skipButton.click();

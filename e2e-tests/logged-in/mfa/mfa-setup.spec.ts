@@ -327,13 +327,17 @@ test.describe("MFA - Setup and Management", () => {
     expect(isEnabled).toBe(true);
   });
 
-  test("should show environment message in LOCAL mode", async ({ page }) => {
-    console.log("[Test] Show LOCAL environment message");
+  test("should show environment message in non-PRODUCTION mode", async ({
+    page,
+  }) => {
+    console.log("[Test] Show non-PRODUCTION environment message");
 
     await page.goto("/settings/security");
 
-    // Should show LOCAL environment message
-    await expect(page.getByText(/optional in development mode/i)).toBeVisible();
-    console.log("✓ LOCAL environment message displayed");
+    // Should show non-PRODUCTION environment message
+    await expect(
+      page.getByText(/Multi-factor authentication is optional/i)
+    ).toBeVisible();
+    console.log("✓ Non-PRODUCTION environment message displayed");
   });
 });

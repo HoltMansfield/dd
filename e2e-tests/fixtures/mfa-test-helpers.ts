@@ -1,8 +1,7 @@
 import { authenticator } from "otplib";
-import { db } from "@/db/connect";
-import { users } from "@/db/schema";
-import { eq } from "drizzle-orm";
 import { createHash } from "crypto";
+import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+import type { eq } from "drizzle-orm";
 
 /**
  * Generate a valid TOTP code for testing
@@ -22,6 +21,9 @@ function hashBackupCode(code: string): string {
  * Enable MFA for a test user with a known secret
  */
 export async function enableMFAForTestUser(
+  db: any,
+  users: any,
+  eq: any,
   userId: string,
   secret: string = "JBSWY3DPEHPK3PXP", // Base32 encoded test secret
   backupCodes: string[] = ["TESTCODE1", "TESTCODE2", "TESTCODE3"]
@@ -44,7 +46,12 @@ export async function enableMFAForTestUser(
 /**
  * Disable MFA for a test user
  */
-export async function disableMFAForTestUser(userId: string): Promise<void> {
+export async function disableMFAForTestUser(
+  db: any,
+  users: any,
+  eq: any,
+  userId: string
+): Promise<void> {
   await db
     .update(users)
     .set({
@@ -60,7 +67,12 @@ export async function disableMFAForTestUser(userId: string): Promise<void> {
 /**
  * Check if user has MFA enabled
  */
-export async function checkMFAStatus(userId: string): Promise<boolean> {
+export async function checkMFAStatus(
+  db: any,
+  users: any,
+  eq: any,
+  userId: string
+): Promise<boolean> {
   const [user] = await db
     .select({ mfaEnabled: users.mfaEnabled })
     .from(users)
@@ -73,7 +85,12 @@ export async function checkMFAStatus(userId: string): Promise<boolean> {
 /**
  * Get remaining backup codes count
  */
-export async function getBackupCodesCount(userId: string): Promise<number> {
+export async function getBackupCodesCount(
+  db: any,
+  users: any,
+  eq: any,
+  userId: string
+): Promise<number> {
   const [user] = await db
     .select({ mfaBackupCodes: users.mfaBackupCodes })
     .from(users)

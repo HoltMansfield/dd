@@ -140,12 +140,13 @@ export default function MFASetup({ onComplete, onCancel }: MFASetupProps) {
           </p>
           <div className="flex justify-center bg-white p-4 rounded-lg border-2 border-gray-200">
             {qrCode && (
+              // eslint-disable-next-line @next/next/no-img-element
               <img src={qrCode} alt="MFA QR Code" className="w-64 h-64" />
             )}
           </div>
           <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
-            <p className="text-xs text-gray-600 mb-2">
-              Can't scan? Enter this code manually:
+            <p className="text-sm text-gray-600 mb-2">
+              Can&apos;t scan? Enter this code manually:
             </p>
             <code className="text-sm font-mono bg-white px-2 py-1 rounded border border-gray-300 break-all">
               {secret}

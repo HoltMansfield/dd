@@ -151,7 +151,6 @@ export default function SecuritySettings({
               }}
               placeholder="Your password"
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none mb-4"
-              autoFocus
             />
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">

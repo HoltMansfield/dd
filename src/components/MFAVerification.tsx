@@ -103,7 +103,6 @@ export default function MFAVerification({
             }}
             placeholder={useBackupCode ? "XXXXXXXX" : "000000"}
             className="w-full text-center text-2xl font-mono tracking-widest px-4 py-3 border-2 border-gray-300 rounded-md focus:border-blue-500 focus:outline-none"
-            autoFocus
           />
         </div>
 

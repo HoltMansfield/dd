@@ -99,7 +99,9 @@ export default function MFASetup({ onComplete, onCancel }: MFASetupProps) {
             </p>
           </div>
           <div className="space-y-2">
-            <h3 className="font-semibold text-gray-900">What you'll need:</h3>
+            <h3 className="font-semibold text-gray-900">
+              What you&apos;ll need:
+            </h3>
             <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
               <li>An authenticator app (Google Authenticator, Authy, etc.)</li>
               <li>Your phone or tablet</li>

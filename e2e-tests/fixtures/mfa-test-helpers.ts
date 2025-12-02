@@ -1,6 +1,6 @@
 import { authenticator } from "otplib";
-import { db } from "../../src/db/connect";
-import { users } from "../../src/db/schema";
+import { db } from "@/db/connect";
+import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { createHash } from "crypto";
 

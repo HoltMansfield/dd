@@ -27,10 +27,5 @@ export default defineConfig({
       testDir: "e2e-tests/rbac",
       use: { storageState: undefined }, // RBAC tests manage their own auth
     },
-    {
-      name: "mfa",
-      testDir: "e2e-tests/mfa",
-      use: { storageState: undefined }, // MFA tests manage their own auth
-    },
   ],
 });

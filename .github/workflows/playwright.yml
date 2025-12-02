@@ -135,10 +135,11 @@ jobs:
       - name: Build application
         run: npm run build:e2e
 
+      - name: Start server in background
+        run: npm run e2e:start &
+
       - name: Run E2E tests - ${{ matrix.project }}
-        run:
-          npx wait-on http://localhost:3001 && dotenv -e .env.e2e -- playwright test --project=${{ matrix.project }} &
-          npm run e2e:start
+        run: npx wait-on http://localhost:3001 && dotenv -e .env.e2e -- playwright test --project=${{ matrix.project }}
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}

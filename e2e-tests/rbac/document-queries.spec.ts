@@ -19,11 +19,6 @@ test.describe("RBAC - Document Queries", () => {
   });
 
   test.beforeEach(async () => {
-    // Clean up any leftover documents first
-    await cleanupTestDocuments(testUsers.owner.id);
-    await cleanupTestDocuments(testUsers.viewer.id);
-    await cleanupTestDocuments(testUsers.editor.id);
-
     // Create multiple test documents
     const doc1 = await createTestDocument(testUsers.owner.id, "doc1.txt");
     const doc2 = await createTestDocument(testUsers.owner.id, "doc2.txt");
@@ -32,6 +27,7 @@ test.describe("RBAC - Document Queries", () => {
   });
 
   test.afterEach(async () => {
+    // Clean up documents for all test users
     await cleanupTestDocuments(testUsers.owner.id);
     await cleanupTestDocuments(testUsers.viewer.id);
     await cleanupTestDocuments(testUsers.editor.id);

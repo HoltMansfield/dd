@@ -1,11 +1,11 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import MFAVerification from "../../../components/MFAVerification";
 import { completeMFALogin } from "./actions";
 
-export default function MFAVerifyPage() {
+function MFAVerifyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const userId = searchParams.get("userId");
@@ -51,5 +51,19 @@ export default function MFAVerifyPage() {
         onCancel={handleCancel}
       />
     </main>
+  );
+}
+
+export default function MFAVerifyPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          Loading...
+        </div>
+      }
+    >
+      <MFAVerifyContent />
+    </Suspense>
   );
 }

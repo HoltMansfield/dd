@@ -181,8 +181,15 @@ test.describe("RBAC - Revoke Access", () => {
 
     expect(auditLog).toBeDefined();
     expect(auditLog.success).toBe(1);
-    expect(auditLog.metadata).toContain(testUsers.viewer.id);
-    expect(auditLog.metadata).toContain("viewer"); // Previous permission level
+    expect(auditLog.action).toBe("revoke");
+    expect(auditLog.userId).toBe(testUsers.owner.id);
+    expect(auditLog.documentId).toBe(testDocumentId);
+    expect(auditLog.metadata).toBeTruthy();
+
+    // Verify metadata contains revocation details
+    const metadata = JSON.parse(auditLog.metadata!);
+    expect(metadata.revokedFrom).toBe(testUsers.viewer.id);
+    expect(metadata.previousPermission).toBe("viewer");
   });
 
   test("permission is deleted from database after revoke", async () => {

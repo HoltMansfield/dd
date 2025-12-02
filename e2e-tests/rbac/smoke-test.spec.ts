@@ -110,8 +110,26 @@ test.describe("RBAC - Smoke Test", () => {
     const shareLog = logs.find((log) => log.action === "share");
     const revokeLog = logs.find((log) => log.action === "revoke");
 
+    // Verify share log
     expect(shareLog).toBeDefined();
+    expect(shareLog!.success).toBe(1);
+    expect(shareLog!.userId).toBe(testUsers.owner.id);
+    expect(shareLog!.action).toBe("share");
+
+    const shareMetadata = JSON.parse(shareLog!.metadata!);
+    expect(shareMetadata.sharedWith).toBe(testUsers.viewer.id);
+    expect(shareMetadata.permission).toBe("viewer");
+
+    // Verify revoke log
     expect(revokeLog).toBeDefined();
+    expect(revokeLog!.success).toBe(1);
+    expect(revokeLog!.userId).toBe(testUsers.owner.id);
+    expect(revokeLog!.action).toBe("revoke");
+
+    const revokeMetadata = JSON.parse(revokeLog!.metadata!);
+    expect(revokeMetadata.revokedFrom).toBe(testUsers.viewer.id);
+    expect(revokeMetadata.previousPermission).toBe("viewer");
+
     console.log("[Smoke Test] ✓ Audit logs created");
 
     // 10. Cleanup

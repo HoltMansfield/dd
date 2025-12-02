@@ -76,24 +76,29 @@ test.describe("RBAC - Document Sharing", () => {
       "editor"
     );
 
-    // Small delay to ensure database write is committed
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    // Verify permission was created
+    // Verify permission was created with retry logic
     const { db } = await import("../../src/db/connect");
     const { documentPermissions } = await import("../../src/db/schema");
     const { eq, and } = await import("drizzle-orm");
 
-    const [permission] = await db
-      .select()
-      .from(documentPermissions)
-      .where(
-        and(
-          eq(documentPermissions.documentId, testDocumentId),
-          eq(documentPermissions.userId, testUsers.editor.id)
+    // Retry up to 5 times with 200ms delay between attempts
+    let permission;
+    for (let i = 0; i < 5; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      [permission] = await db
+        .select()
+        .from(documentPermissions)
+        .where(
+          and(
+            eq(documentPermissions.documentId, testDocumentId),
+            eq(documentPermissions.userId, testUsers.editor.id)
+          )
         )
-      )
-      .limit(1);
+        .limit(1);
+
+      if (permission) break;
+    }
 
     expect(permission).toBeDefined();
     expect(permission.permissionLevel).toBe("editor");

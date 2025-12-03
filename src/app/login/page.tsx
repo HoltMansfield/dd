@@ -27,10 +27,12 @@ export default function LoginPage() {
   });
   const { handleSubmit } = methods;
 
-  // Redirect to MFA verification if required
+  // Handle redirects after successful login
   useEffect(() => {
     if (state?.requiresMFA && state?.userId) {
       router.push(`/login/verify?userId=${state.userId}`);
+    } else if (state?.success) {
+      router.push("/");
     }
   }, [state, router]);
 

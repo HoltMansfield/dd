@@ -28,7 +28,13 @@ export async function completeMFALogin(): Promise<{
       email: tempSession.email,
       id: tempSession.userId,
     });
-    cookieStore.set("session_user", sessionData, { path: "/" });
+    cookieStore.set("session_user", sessionData, {
+      path: "/",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    });
 
     // Remove temporary MFA cookie
     cookieStore.delete("mfa_pending");

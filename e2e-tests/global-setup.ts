@@ -12,6 +12,34 @@ async function globalSetup(config: FullConfig) {
   const baseURL = process.env.E2E_URL!;
   console.log(`Using base URL: ${baseURL}`);
 
+  // Ensure MFA is disabled for the global test user before starting
+  try {
+    console.log("Disabling MFA for global test user...");
+    const { db } = await import("../src/db/connect");
+    const { users } = await import("../src/db/schema");
+    const { eq } = await import("drizzle-orm");
+
+    const [user] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, TEST_EMAIL))
+      .limit(1);
+
+    if (user) {
+      await db
+        .update(users)
+        .set({
+          mfaEnabled: false,
+          mfaSecret: null,
+          mfaBackupCodes: null,
+        })
+        .where(eq(users.id, user.id));
+      console.log("MFA disabled for global test user");
+    }
+  } catch (error) {
+    console.log("Could not disable MFA (user may not exist yet):", error);
+  }
+
   // Launch browser with slower timeouts and debug logging
   const browser = await chromium.launch({
     slowMo: 100,
@@ -67,11 +95,18 @@ async function globalSetup(config: FullConfig) {
       // Fill login form
       await page.fill('input[name="email"]', TEST_EMAIL);
       await page.fill('input[name="password"]', TEST_PASSWORD);
-      await page.click('button[type="submit"]');
+
+      console.log("Submitting login form...");
+
+      // Click submit and wait for navigation
+      await Promise.all([
+        page.waitForURL(baseURL + "/", { timeout: 10000 }).catch(() => {
+          console.log("Navigation timeout, but continuing...");
+        }),
+        page.click('button[type="submit"]'),
+      ]);
 
       console.log("Waiting for redirect after login...");
-
-      // Wait for navigation to complete
       await page.waitForTimeout(2000);
       console.log(`Current URL after login attempt: ${page.url()}`);
 
@@ -101,14 +136,54 @@ async function globalSetup(config: FullConfig) {
 
     console.log("Successfully logged in!");
 
+    // Wait a bit longer to ensure cookies are set
+    await page.waitForTimeout(3000);
+
+    // Verify we're actually logged in by checking for user-specific content
+    try {
+      await page.waitForSelector('button:has-text("Logout")', {
+        timeout: 5000,
+      });
+      console.log("Logout button found - user is logged in");
+    } catch (e) {
+      console.log("Warning: Logout button not found, but continuing anyway");
+    }
+
+    // Debug: Check cookies before saving
+    const cookies = await context.cookies();
+    console.log(`Found ${cookies.length} cookies in context`);
+    if (cookies.length > 0) {
+      console.log("Cookie names:", cookies.map((c) => c.name).join(", "));
+      const sessionCookie = cookies.find((c) => c.name === "session_user");
+      if (sessionCookie) {
+        console.log("session_user cookie found:", {
+          value: sessionCookie.value.substring(0, 50) + "...",
+          httpOnly: sessionCookie.httpOnly,
+          secure: sessionCookie.secure,
+        });
+      } else {
+        console.log("WARNING: session_user cookie NOT found!");
+      }
+    }
+
     // Save storage state (cookies, localStorage)
     const storageStatePath = "e2e-tests/storageState.json";
     console.log(`Saving auth state to ${storageStatePath}...`);
     await page.context().storageState({ path: storageStatePath });
 
-    // Verify the file was created
+    // Verify the file was created and has content
     if (fs.existsSync(storageStatePath)) {
+      const content = fs.readFileSync(storageStatePath, "utf-8");
+      const state = JSON.parse(content);
       console.log("Storage state file created successfully!");
+      console.log(`Cookies saved: ${state.cookies?.length || 0}`);
+      console.log(`Origins saved: ${state.origins?.length || 0}`);
+      if (state.cookies?.length > 0) {
+        console.log(
+          "Cookie names:",
+          state.cookies.map((c: any) => c.name).join(", ")
+        );
+      }
     } else {
       console.error("Failed to create storage state file!");
     }

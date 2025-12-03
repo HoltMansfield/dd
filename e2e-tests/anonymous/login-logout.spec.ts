@@ -52,7 +52,7 @@ test("register, login, and logout flow", async ({ page }) => {
   // Find and click the logout button (use desktop version which is visible)
   await page.click('[data-testid="logout-desktop"]');
 
-  // Verify we're back at the login page
-  await page.waitForTimeout(1000);
+  // Wait for redirect to login page
+  await page.waitForURL("**/login", { timeout: 10000 });
   expect(page.url()).toContain("/login");
 });

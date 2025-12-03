@@ -1,8 +1,9 @@
 import { chromium, FullConfig, expect } from "@playwright/test";
-//import dotenv from 'dotenv';
+import dotenv from "dotenv";
 import fs from "fs";
 
-//dotenv.config({ path: '.env.e2e' });
+// Ensure environment variables are loaded for database connection
+dotenv.config({ path: ".env.e2e" });
 
 export const TEST_EMAIL = "e2e-logged-in-test@example.com";
 export const TEST_PASSWORD = "e2epassword123";
@@ -12,9 +13,9 @@ async function globalSetup(config: FullConfig) {
   const baseURL = process.env.E2E_URL!;
   console.log(`Using base URL: ${baseURL}`);
 
-  // Ensure MFA is disabled for the global test user before starting
+  // Ensure MFA is disabled and account is unlocked for the global test user before starting
   try {
-    console.log("Disabling MFA for global test user...");
+    console.log("Resetting global test user state (MFA, lockout)...");
     const { db } = await import("../src/db/connect");
     const { users } = await import("../src/db/schema");
     const { eq } = await import("drizzle-orm");
@@ -32,12 +33,14 @@ async function globalSetup(config: FullConfig) {
           mfaEnabled: false,
           mfaSecret: null,
           mfaBackupCodes: null,
+          failedLoginAttempts: 0,
+          lockoutUntil: null,
         })
         .where(eq(users.id, user.id));
-      console.log("MFA disabled for global test user");
+      console.log("MFA disabled and lockout reset for global test user");
     }
   } catch (error) {
-    console.log("Could not disable MFA (user may not exist yet):", error);
+    console.log("Could not reset user state (user may not exist yet):", error);
   }
 
   // Launch browser with slower timeouts and debug logging
@@ -63,11 +66,23 @@ async function globalSetup(config: FullConfig) {
     await page.fill('input[name="password"]', TEST_PASSWORD);
     await page.click('button[type="submit"]');
 
-    // After registration, check where we ended up
-    console.log("Checking post-registration state...");
-
-    // Wait a bit for any redirects to complete
-    await page.waitForTimeout(2000);
+    // After registration, wait for redirect to login page (React client-side redirect)
+    console.log("Waiting for redirect to login page after registration...");
+    try {
+      await page.waitForURL("**/login", { timeout: 10000 });
+      console.log("Successfully redirected to login page after registration");
+    } catch {
+      // User might already exist, check if we got an error or stayed on register
+      const errorText = await page
+        .locator("text=User already exists")
+        .isVisible()
+        .catch(() => false);
+      if (errorText) {
+        console.log("User already exists, proceeding to login...");
+      } else {
+        console.log("Registration redirect timeout, proceeding anyway...");
+      }
+    }
 
     // Log current URL for debugging
     console.log(`Current URL after registration: ${page.url()}`);
@@ -97,41 +112,50 @@ async function globalSetup(config: FullConfig) {
       await page.fill('input[name="password"]', TEST_PASSWORD);
 
       console.log("Submitting login form...");
+      await page.click('button[type="submit"]');
 
-      // Click submit and wait for navigation
-      await Promise.all([
-        page.waitForURL(baseURL + "/", { timeout: 10000 }).catch(() => {
-          console.log("Navigation timeout, but continuing...");
-        }),
-        page.click('button[type="submit"]'),
-      ]);
+      // Wait for the React client-side redirect to home page
+      // The login form uses useEffect to call router.push("/") after state.success
+      console.log("Waiting for redirect to home page after login...");
+      try {
+        await page.waitForURL(baseURL + "/", { timeout: 15000 });
+        console.log("Successfully redirected to home page");
+      } catch {
+        console.log(`Login redirect timeout. Current URL: ${page.url()}`);
 
-      console.log("Waiting for redirect after login...");
-      await page.waitForTimeout(2000);
+        // Check if there's an error message displayed
+        const errorVisible = await page
+          .locator("text=Invalid credentials")
+          .isVisible()
+          .catch(() => false);
+        const lockedVisible = await page
+          .locator("text=Account is locked")
+          .isVisible()
+          .catch(() => false);
+
+        if (errorVisible) {
+          console.log(
+            "ERROR: Invalid credentials - check TEST_EMAIL and TEST_PASSWORD"
+          );
+        } else if (lockedVisible) {
+          console.log("ERROR: Account is locked");
+        } else {
+          // Maybe the redirect happened but URL check failed, verify we're logged in
+          const logoutButton = await page
+            .locator('button:has-text("Logout")')
+            .isVisible()
+            .catch(() => false);
+          if (logoutButton) {
+            console.log("Login successful (logout button visible)");
+          } else {
+            console.log(
+              "Login may have failed - no error message but not redirected"
+            );
+          }
+        }
+      }
+
       console.log(`Current URL after login attempt: ${page.url()}`);
-
-      // Try login again if we're still on the login page
-      let retryCount = 0;
-      const maxRetries = 3;
-
-      while (page.url().includes("/login") && retryCount < maxRetries) {
-        console.log(`Retry login attempt ${retryCount + 1}`);
-        await page.fill('input[name="email"]', TEST_EMAIL);
-        await page.fill('input[name="password"]', TEST_PASSWORD);
-        await page.click('button[type="submit"]');
-        await page.waitForTimeout(2000);
-        retryCount++;
-      }
-
-      // If still on login page, force navigation to home
-      if (page.url() !== baseURL && page.url() !== `${baseURL}/`) {
-        console.log("Manually navigating to home page");
-        await page.goto(baseURL);
-        await page.waitForTimeout(1000);
-      }
-
-      // Create a storage state even if we can't verify loginThis allows tests to continue with whatever state we have
-      console.log("Creating storage state regardless of login status");
     }
 
     console.log("Successfully logged in!");

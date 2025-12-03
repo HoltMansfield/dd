@@ -31,6 +31,8 @@ export default defineConfig({
       name: "rbac",
       testDir: "e2e-tests/rbac",
       use: { storageState: undefined }, // RBAC tests manage their own auth
+      fullyParallel: false, // Run RBAC tests serially to avoid shared data conflicts
+      workers: 1, // Single worker to prevent parallel file execution
     },
   ],
 });

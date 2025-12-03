@@ -14,8 +14,15 @@ let testUsers: Record<keyof typeof RBAC_TEST_USERS, TestUser>;
 let testDocumentIds: string[] = [];
 
 test.describe("RBAC - Document Queries", () => {
+  // Run tests serially to avoid race conditions with shared test data
+  test.describe.configure({ mode: "serial" });
+
   test.beforeAll(async () => {
     testUsers = await setupRBACTestUsers();
+    // Clean up any leftover documents from previous test runs
+    await cleanupTestDocuments(testUsers.owner.id);
+    await cleanupTestDocuments(testUsers.viewer.id);
+    await cleanupTestDocuments(testUsers.editor.id);
   });
 
   test.beforeEach(async () => {

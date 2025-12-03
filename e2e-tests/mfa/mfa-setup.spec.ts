@@ -2,7 +2,8 @@ import { test, expect } from "@playwright/test";
 import {
   disableMFAForTestUser,
   checkMFAStatus,
-} from "../../fixtures/mfa-test-helpers";
+  enableMFAForTestUser,
+} from "../fixtures/mfa-test-helpers";
 
 // Test user credentials
 const TEST_USER = {
@@ -16,8 +17,8 @@ let testUserId: string;
 test.describe("MFA - Setup and Management", () => {
   test.beforeAll(async () => {
     // Create test user
-    const { db } = await import("../../../src/db/connect");
-    const { users } = await import("../../../src/db/schema");
+    const { db } = await import("../../src/db/connect");
+    const { users } = await import("../../src/db/schema");
     const bcrypt = await import("bcryptjs");
 
     const passwordHash = await bcrypt.hash(TEST_USER.password, 10);
@@ -37,8 +38,8 @@ test.describe("MFA - Setup and Management", () => {
 
   test.afterAll(async () => {
     // Clean up test user
-    const { db } = await import("../../../src/db/connect");
-    const { users } = await import("../../../src/db/schema");
+    const { db } = await import("../../src/db/connect");
+    const { users } = await import("../../src/db/schema");
     const { eq } = await import("drizzle-orm");
 
     await db.delete(users).where(eq(users.id, testUserId));
@@ -47,8 +48,8 @@ test.describe("MFA - Setup and Management", () => {
 
   test.beforeEach(async ({ page }) => {
     // Ensure MFA is disabled and user is logged in
-    const { db } = await import("../../../src/db/connect");
-    const { users } = await import("../../../src/db/schema");
+    const { db } = await import("../../src/db/connect");
+    const { users } = await import("../../src/db/schema");
     const { eq } = await import("drizzle-orm");
     await disableMFAForTestUser(db, users, eq, testUserId);
 
@@ -63,12 +64,18 @@ test.describe("MFA - Setup and Management", () => {
   test("should navigate to security settings", async ({ page }) => {
     console.log("[Test] Navigate to security settings");
 
-    // Click Security link in navbar
-    await page.click('a:has-text("Security")');
+    // Wait for page to load
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    // Click Security link in navbar (use .last() to get the desktop version)
+    await page.locator('a[href="/settings/security"]').last().click();
 
     // Should be on security settings page
     await expect(page).toHaveURL("/settings/security");
-    await expect(page.getByText("Security Settings")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Security Settings" })
+    ).toBeVisible();
     console.log("✓ Navigated to security settings");
   });
 
@@ -76,9 +83,12 @@ test.describe("MFA - Setup and Management", () => {
     console.log("[Test] Show MFA disabled status");
 
     await page.goto("/settings/security");
+    await page.waitForLoadState("networkidle");
 
     // Should show MFA section
-    await expect(page.getByText("Two-Factor Authentication")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Two-Factor Authentication" })
+    ).toBeVisible();
 
     // Should show disabled status
     await expect(page.getByText("Disabled")).toBeVisible();
@@ -171,22 +181,23 @@ test.describe("MFA - Setup and Management", () => {
 
     // Enable MFA directly in database
     const { enableMFAForTestUser } = await import(
-      "../../fixtures/mfa-test-helpers"
+      "../fixtures/mfa-test-helpers"
     );
-    const { db } = await import("../../../src/db/connect");
-    const { users } = await import("../../../src/db/schema");
+    const { db } = await import("../../src/db/connect");
+    const { users } = await import("../../src/db/schema");
     const { eq } = await import("drizzle-orm");
-    await enableMFAForTestUser(db, users, eq, testUserId);
+    const userId = testUserId;
+    await enableMFAForTestUser(db, users, eq, userId);
 
     // Verify in database
-    const { db: dbCheck } = await import("../../../src/db/connect");
-    const { users: usersCheck } = await import("../../../src/db/schema");
+    const { db: dbCheck } = await import("../../src/db/connect");
+    const { users: usersCheck } = await import("../../src/db/schema");
     const { eq: eqCheck } = await import("drizzle-orm");
     const isEnabled = await checkMFAStatus(
       dbCheck,
       usersCheck,
       eqCheck,
-      testUserId
+      userId
     );
     expect(isEnabled).toBe(true);
 
@@ -208,17 +219,19 @@ test.describe("MFA - Setup and Management", () => {
 
     // Enable MFA first
     const { enableMFAForTestUser } = await import(
-      "../../fixtures/mfa-test-helpers"
+      "../fixtures/mfa-test-helpers"
     );
-    const { db } = await import("../../../src/db/connect");
-    const { users } = await import("../../../src/db/schema");
+    const { db } = await import("../../src/db/connect");
+    const { users } = await import("../../src/db/schema");
     const { eq } = await import("drizzle-orm");
-    await enableMFAForTestUser(db, users, eq, testUserId);
+    const userId = testUserId;
+    await enableMFAForTestUser(db, users, eq, userId);
 
     await page.goto("/settings/security");
+    await page.waitForLoadState("networkidle");
 
     // Click Disable MFA
-    await page.click('button:has-text("Disable MFA")');
+    await page.getByRole("button", { name: "Disable MFA" }).first().click();
 
     // Should show confirmation modal
     await expect(
@@ -226,23 +239,28 @@ test.describe("MFA - Setup and Management", () => {
     ).toBeVisible();
     console.log("✓ Confirmation modal displayed");
 
-    // Enter password
+    // Enter password and click the Disable MFA button in the modal
     await page.fill('input[type="password"]', TEST_USER.password);
-    await page.click('button:has-text("Disable MFA")');
+    await page.getByRole("button", { name: "Disable MFA" }).last().click();
+
+    // Wait for modal to close
+    await expect(
+      page.getByText("Disable Two-Factor Authentication")
+    ).not.toBeVisible();
 
     // Should return to settings with MFA disabled
     await expect(page.getByText("Disabled")).toBeVisible();
     console.log("✓ MFA disabled successfully");
 
     // Verify in database
-    const { db: dbCheck } = await import("../../../src/db/connect");
-    const { users: usersCheck } = await import("../../../src/db/schema");
+    const { db: dbCheck } = await import("../../src/db/connect");
+    const { users: usersCheck } = await import("../../src/db/schema");
     const { eq: eqCheck } = await import("drizzle-orm");
     const isEnabled = await checkMFAStatus(
       dbCheck,
       usersCheck,
       eqCheck,
-      testUserId
+      userId
     );
     expect(isEnabled).toBe(false);
   });
@@ -252,35 +270,42 @@ test.describe("MFA - Setup and Management", () => {
 
     // Enable MFA first
     const { enableMFAForTestUser } = await import(
-      "../../fixtures/mfa-test-helpers"
+      "../fixtures/mfa-test-helpers"
     );
-    const { db } = await import("../../../src/db/connect");
-    const { users } = await import("../../../src/db/schema");
+    const { db } = await import("../../src/db/connect");
+    const { users } = await import("../../src/db/schema");
     const { eq } = await import("drizzle-orm");
-    await enableMFAForTestUser(db, users, eq, testUserId);
+    const userId = testUserId;
+    await enableMFAForTestUser(db, users, eq, userId);
 
     await page.goto("/settings/security");
+    await page.waitForLoadState("networkidle");
 
     // Click Disable MFA
-    await page.click('button:has-text("Disable MFA")');
+    await page.getByRole("button", { name: "Disable MFA" }).first().click();
 
-    // Enter wrong password
+    // Wait for modal
+    await expect(
+      page.getByText("Disable Two-Factor Authentication")
+    ).toBeVisible();
+
+    // Enter wrong password and click the Disable MFA button in the modal
     await page.fill('input[type="password"]', "WrongPassword123!");
-    await page.click('button:has-text("Disable MFA")');
+    await page.getByRole("button", { name: "Disable MFA" }).last().click();
 
     // Should show error
     await expect(page.getByText(/invalid password/i)).toBeVisible();
     console.log("✓ Wrong password rejected");
 
     // MFA should still be enabled
-    const { db: dbCheck } = await import("../../../src/db/connect");
-    const { users: usersCheck } = await import("../../../src/db/schema");
+    const { db: dbCheck } = await import("../../src/db/connect");
+    const { users: usersCheck } = await import("../../src/db/schema");
     const { eq: eqCheck } = await import("drizzle-orm");
     const isEnabled = await checkMFAStatus(
       dbCheck,
       usersCheck,
       eqCheck,
-      testUserId
+      userId
     );
     expect(isEnabled).toBe(true);
   });
@@ -290,12 +315,13 @@ test.describe("MFA - Setup and Management", () => {
 
     // Enable MFA first
     const { enableMFAForTestUser } = await import(
-      "../../fixtures/mfa-test-helpers"
+      "../fixtures/mfa-test-helpers"
     );
-    const { db } = await import("../../../src/db/connect");
-    const { users } = await import("../../../src/db/schema");
+    const { db } = await import("../../src/db/connect");
+    const { users } = await import("../../src/db/schema");
     const { eq } = await import("drizzle-orm");
-    await enableMFAForTestUser(db, users, eq, testUserId);
+    const userId = testUserId;
+    await enableMFAForTestUser(db, users, eq, userId);
 
     await page.goto("/settings/security");
 
@@ -315,14 +341,14 @@ test.describe("MFA - Setup and Management", () => {
     console.log("✓ Disable canceled successfully");
 
     // Verify MFA still enabled
-    const { db: dbCheck } = await import("../../../src/db/connect");
-    const { users: usersCheck } = await import("../../../src/db/schema");
+    const { db: dbCheck } = await import("../../src/db/connect");
+    const { users: usersCheck } = await import("../../src/db/schema");
     const { eq: eqCheck } = await import("drizzle-orm");
     const isEnabled = await checkMFAStatus(
       dbCheck,
       usersCheck,
       eqCheck,
-      testUserId
+      userId
     );
     expect(isEnabled).toBe(true);
   });

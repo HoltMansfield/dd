@@ -5,7 +5,7 @@ import {
   disableMFAForTestUser,
   checkMFAStatus,
   getBackupCodesCount,
-} from "../../fixtures/mfa-test-helpers";
+} from "../fixtures/mfa-test-helpers";
 
 // Test user credentials
 const TEST_USER = {
@@ -16,13 +16,13 @@ const TEST_USER = {
 
 let testUserId: string;
 const TEST_SECRET = "JBSWY3DPEHPK3PXP"; // Known test secret
-const TEST_BACKUP_CODES = ["TESTCODE1", "TESTCODE2", "TESTCODE3"];
+const TEST_BACKUP_CODES = ["TESTCOD1", "TESTCOD2", "TESTCOD3"]; // 8 characters each
 
 test.describe("MFA - Login Flow", () => {
   test.beforeAll(async () => {
     // Create test user
-    const { db } = await import("../../../src/db/connect");
-    const { users } = await import("../../../src/db/schema");
+    const { db } = await import("../../src/db/connect");
+    const { users } = await import("../../src/db/schema");
     const bcrypt = await import("bcryptjs");
 
     const passwordHash = await bcrypt.hash(TEST_USER.password, 10);
@@ -42,8 +42,8 @@ test.describe("MFA - Login Flow", () => {
 
   test.afterAll(async () => {
     // Clean up test user
-    const { db } = await import("../../../src/db/connect");
-    const { users } = await import("../../../src/db/schema");
+    const { db } = await import("../../src/db/connect");
+    const { users } = await import("../../src/db/schema");
     const { eq } = await import("drizzle-orm");
 
     await db.delete(users).where(eq(users.id, testUserId));
@@ -52,8 +52,8 @@ test.describe("MFA - Login Flow", () => {
 
   test.beforeEach(async () => {
     // Ensure MFA is disabled before each test
-    const { db } = await import("../../../src/db/connect");
-    const { users } = await import("../../../src/db/schema");
+    const { db } = await import("../../src/db/connect");
+    const { users } = await import("../../src/db/schema");
     const { eq } = await import("drizzle-orm");
     await disableMFAForTestUser(db, users, eq, testUserId);
   });
@@ -70,7 +70,7 @@ test.describe("MFA - Login Flow", () => {
 
     // Should redirect to home page
     await expect(page).toHaveURL("/");
-    console.log("✓ Logged in without MFA");
+    console.log("Logged in without MFA");
   });
 
   test("should redirect to MFA verification when MFA enabled", async ({
@@ -79,8 +79,8 @@ test.describe("MFA - Login Flow", () => {
     console.log("[Test] Login with MFA - redirect to verification");
 
     // Enable MFA for test user
-    const { db } = await import("../../../src/db/connect");
-    const { users } = await import("../../../src/db/schema");
+    const { db } = await import("../../src/db/connect");
+    const { users } = await import("../../src/db/schema");
     const { eq } = await import("drizzle-orm");
     await enableMFAForTestUser(
       db,
@@ -100,19 +100,19 @@ test.describe("MFA - Login Flow", () => {
 
     // Should redirect to MFA verification page
     await expect(page).toHaveURL(/\/login\/verify/);
-    console.log("✓ Redirected to MFA verification");
+    console.log("Redirected to MFA verification");
 
     // Should show MFA verification UI
     await expect(page.getByText("Two-Factor Authentication")).toBeVisible();
-    console.log("✓ MFA verification page displayed");
+    console.log("MFA verification page displayed");
   });
 
   test("should login successfully with valid TOTP code", async ({ page }) => {
     console.log("[Test] Login with valid TOTP code");
 
     // Enable MFA for test user
-    const { db } = await import("../../../src/db/connect");
-    const { users } = await import("../../../src/db/schema");
+    const { db } = await import("../../src/db/connect");
+    const { users } = await import("../../src/db/schema");
     const { eq } = await import("drizzle-orm");
     await enableMFAForTestUser(
       db,
@@ -143,15 +143,15 @@ test.describe("MFA - Login Flow", () => {
 
     // Should be logged in and redirected to home
     await expect(page).toHaveURL("/");
-    console.log("✓ Successfully logged in with TOTP code");
+    console.log("Successfully logged in with TOTP code");
   });
 
   test("should reject invalid TOTP code", async ({ page }) => {
     console.log("[Test] Reject invalid TOTP code");
 
     // Enable MFA for test user
-    const { db } = await import("../../../src/db/connect");
-    const { users } = await import("../../../src/db/schema");
+    const { db } = await import("../../src/db/connect");
+    const { users } = await import("../../src/db/schema");
     const { eq } = await import("drizzle-orm");
     await enableMFAForTestUser(
       db,
@@ -178,7 +178,7 @@ test.describe("MFA - Login Flow", () => {
 
     // Should show error
     await expect(page.getByText(/invalid/i)).toBeVisible();
-    console.log("✓ Invalid code rejected");
+    console.log("Invalid code rejected");
 
     // Should still be on verification page
     await expect(page).toHaveURL(/\/login\/verify/);
@@ -188,8 +188,8 @@ test.describe("MFA - Login Flow", () => {
     console.log("[Test] Login with backup code");
 
     // Enable MFA for test user
-    const { db } = await import("../../../src/db/connect");
-    const { users } = await import("../../../src/db/schema");
+    const { db } = await import("../../src/db/connect");
+    const { users } = await import("../../src/db/schema");
     const { eq } = await import("drizzle-orm");
     await enableMFAForTestUser(
       db,
@@ -219,15 +219,15 @@ test.describe("MFA - Login Flow", () => {
 
     // Should be logged in
     await expect(page).toHaveURL("/");
-    console.log("✓ Successfully logged in with backup code");
+    console.log("Successfully logged in with backup code");
   });
 
   test("should invalidate used backup code", async ({ page }) => {
     console.log("[Test] Invalidate used backup code");
 
     // Enable MFA for test user
-    const { db } = await import("../../../src/db/connect");
-    const { users } = await import("../../../src/db/schema");
+    const { db } = await import("../../src/db/connect");
+    const { users } = await import("../../src/db/schema");
     const { eq } = await import("drizzle-orm");
     await enableMFAForTestUser(
       db,
@@ -239,8 +239,8 @@ test.describe("MFA - Login Flow", () => {
     );
 
     // Check initial backup codes count
-    const { db: db1 } = await import("../../../src/db/connect");
-    const { users: users1 } = await import("../../../src/db/schema");
+    const { db: db1 } = await import("../../src/db/connect");
+    const { users: users1 } = await import("../../src/db/schema");
     const { eq: eq1 } = await import("drizzle-orm");
     const initialCount = await getBackupCodesCount(
       db1,
@@ -264,15 +264,15 @@ test.describe("MFA - Login Flow", () => {
     await expect(page).toHaveURL("/");
 
     // Check backup codes count after use
-    const { db: db2 } = await import("../../../src/db/connect");
-    const { users: users2 } = await import("../../../src/db/schema");
+    const { db: db2 } = await import("../../src/db/connect");
+    const { users: users2 } = await import("../../src/db/schema");
     const { eq: eq2 } = await import("drizzle-orm");
     const afterCount = await getBackupCodesCount(db2, users2, eq2, testUserId);
     expect(afterCount).toBe(2);
-    console.log(`✓ Backup codes after use: ${afterCount}`);
+    console.log(`Backup codes after use: ${afterCount}`);
 
-    // Logout
-    await page.click('button:has-text("Logout")');
+    // Logout (click the visible logout button)
+    await page.locator('button:has-text("Logout")').last().click();
     await expect(page).toHaveURL("/login");
 
     // Try to use same backup code again
@@ -286,7 +286,7 @@ test.describe("MFA - Login Flow", () => {
 
     // Should show error
     await expect(page.getByText(/invalid/i)).toBeVisible();
-    console.log("✓ Used backup code rejected");
+    console.log("Used backup code rejected");
   });
 
   test("should allow skipping MFA in non-PRODUCTION environment", async ({
@@ -295,8 +295,8 @@ test.describe("MFA - Login Flow", () => {
     console.log("[Test] Skip MFA in non-PRODUCTION environment");
 
     // Enable MFA for test user
-    const { db } = await import("../../../src/db/connect");
-    const { users } = await import("../../../src/db/schema");
+    const { db } = await import("../../src/db/connect");
+    const { users } = await import("../../src/db/schema");
     const { eq } = await import("drizzle-orm");
     await enableMFAForTestUser(
       db,
@@ -320,22 +320,22 @@ test.describe("MFA - Login Flow", () => {
     // Should see skip button in non-PRODUCTION environment
     const skipButton = page.locator("text=Skip for now");
     await expect(skipButton).toBeVisible();
-    console.log("✓ Skip button visible in non-PRODUCTION environment");
+    console.log("Skip button visible in non-PRODUCTION environment");
 
     // Click skip
     await skipButton.click();
 
     // Should be logged in
     await expect(page).toHaveURL("/");
-    console.log("✓ Successfully skipped MFA verification");
+    console.log("Successfully skipped MFA verification");
   });
 
   test("should handle expired MFA session", async ({ page }) => {
     console.log("[Test] Handle expired MFA session");
 
     // Enable MFA for test user
-    const { db } = await import("../../../src/db/connect");
-    const { users } = await import("../../../src/db/schema");
+    const { db } = await import("../../src/db/connect");
+    const { users } = await import("../../src/db/schema");
     const { eq } = await import("drizzle-orm");
     await enableMFAForTestUser(
       db,

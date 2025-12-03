@@ -6,7 +6,6 @@ import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { MAX_FAILED_ATTEMPTS, LOCKOUT_DURATION_MS } from "./constants";
-import { redirect } from "next/navigation";
 
 async function _loginAction(
   state:
@@ -118,12 +117,18 @@ async function _loginAction(
     email: user.email,
     id: user.id,
   });
-  cookieStore.set("session_user", sessionData, { path: "/" });
+  cookieStore.set("session_user", sessionData, {
+    path: "/",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+  });
 
   // Note: Sentry.setUser() is called on the client-side after successful login via SentryProvider
 
-  // Use server-side redirect instead of returning success
-  redirect("/");
+  // Return success to allow client-side redirect (ensures cookies are set)
+  return { success: true };
 }
 
 export const loginAction = withSentryError(_loginAction);

@@ -18,6 +18,11 @@ export default defineConfig({
       use: { storageState: undefined },
     },
     {
+      name: "mfa",
+      testDir: "e2e-tests/mfa",
+      use: { storageState: undefined }, // MFA tests manage their own auth
+    },
+    {
       name: "logged-in",
       testDir: "e2e-tests/logged-in",
       use: { storageState: "e2e-tests/storageState.json" },

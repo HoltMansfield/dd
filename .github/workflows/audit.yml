@@ -6,7 +6,7 @@ on:
 
 jobs:
   audit:
-    name: Audit Dependencies
+    name: Dependency Audit
     runs-on: ubuntu-latest
     environment: CI # this is where environment variables are set
     steps:

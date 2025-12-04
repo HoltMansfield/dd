@@ -25,9 +25,11 @@ test.describe("Password Policy Enforcement", () => {
     await page.fill('input[name="password"]', "password123!");
     await page.click('button[type="submit"]');
 
-    // Should show validation error
+    // Should show validation error in the form error message
     await expect(
-      page.locator("text=/at least one uppercase letter/i")
+      page.locator('[role="alert"]', {
+        hasText: /at least one uppercase letter/i,
+      })
     ).toBeVisible();
   });
 
@@ -39,9 +41,11 @@ test.describe("Password Policy Enforcement", () => {
     await page.fill('input[name="password"]', "PASSWORD123!");
     await page.click('button[type="submit"]');
 
-    // Should show validation error
+    // Should show validation error in the form error message
     await expect(
-      page.locator("text=/at least one lowercase letter/i")
+      page.locator('[role="alert"]', {
+        hasText: /at least one lowercase letter/i,
+      })
     ).toBeVisible();
   });
 
@@ -53,8 +57,10 @@ test.describe("Password Policy Enforcement", () => {
     await page.fill('input[name="password"]', "PasswordOnly!");
     await page.click('button[type="submit"]');
 
-    // Should show validation error
-    await expect(page.locator("text=/at least one number/i")).toBeVisible();
+    // Should show validation error in the form error message
+    await expect(
+      page.locator('[role="alert"]', { hasText: /at least one number/i })
+    ).toBeVisible();
   });
 
   test("should reject password without special character", async ({ page }) => {
@@ -65,9 +71,11 @@ test.describe("Password Policy Enforcement", () => {
     await page.fill('input[name="password"]', "Password1234");
     await page.click('button[type="submit"]');
 
-    // Should show validation error
+    // Should show validation error in the form error message
     await expect(
-      page.locator("text=/at least one special character/i")
+      page.locator('[role="alert"]', {
+        hasText: /at least one special character/i,
+      })
     ).toBeVisible();
   });
 

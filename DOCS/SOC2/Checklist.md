@@ -29,10 +29,10 @@ This checklist covers the requirements for SOC2-compliant document storage, focu
 
 ### 1.3 Authentication & Authorization
 
-- [ ] Implement strong password policies (minimum 12 characters, complexity requirements)
+- [x] Implement strong password policies (minimum 12 characters, complexity requirements)
 - [ ] Enable MFA for all administrative accounts
 - [ ] Log all authentication attempts (successful and failed)
-- [ ] Implement account lockout after failed login attempts
+- [x] Implement account lockout after failed login attempts
 - [ ] Use secure authentication protocols (OAuth 2.0, SAML, etc.)
 
 ### 1.4 Network Security

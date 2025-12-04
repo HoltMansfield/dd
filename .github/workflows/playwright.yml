@@ -51,9 +51,9 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps
 
-  # Test jobs - run in parallel, reuse cache
+  # Test jobs - run in parallel with sharding
   test:
-    name: E2E Tests - ${{ matrix.project }}
+    name: E2E Tests - ${{ matrix.project }} (Shard ${{ matrix.shard }}/${{ matrix.shardTotal }})
     needs: setup
     environment: e2e
     timeout-minutes: 30
@@ -62,6 +62,8 @@ jobs:
       fail-fast: false # Continue other tests even if one fails
       matrix:
         project: [anonymous, logged-in, rbac]
+        shard: [1, 2, 3, 4]
+        shardTotal: [4]
 
     services:
       postgres:
@@ -138,12 +140,46 @@ jobs:
       - name: Start server in background
         run: npm run e2e:start &
 
-      - name: Run E2E tests - ${{ matrix.project }}
-        run: npm run e2e:test:${{ matrix.project }}
+      - name: Run E2E tests - ${{ matrix.project }} (Shard ${{ matrix.shard }}/${{ matrix.shardTotal }})
+        run: npx playwright test --project=${{ matrix.project }} --shard=${{ matrix.shard }}/${{ matrix.shardTotal }}
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload blob report to GitHub Actions Artifacts
         if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-${{ matrix.project }}
-          path: playwright-report/
+          name: blob-report-${{ matrix.project }}-${{ matrix.shard }}
+          path: blob-report
+          retention-days: 1
+
+  # Merge reports from all shards
+  merge-reports:
+    name: Merge Reports
+    if: ${{ !cancelled() }}
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download blob reports from GitHub Actions Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-blob-reports
+          pattern: blob-report-*
+          merge-multiple: true
+
+      - name: Merge into HTML Report
+        run: npx playwright merge-reports --reporter html ./all-blob-reports
+
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
           retention-days: 30

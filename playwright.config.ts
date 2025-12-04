@@ -6,6 +6,7 @@ dotenv.config({ path: ".env.e2e" });
 export default defineConfig({
   globalSetup: "e2e-tests/global-setup.ts",
   timeout: 60 * 1000,
+  reporter: process.env.CI ? "blob" : "html",
   use: {
     baseURL: process.env.E2E_URL,
     trace: "on-first-retry",

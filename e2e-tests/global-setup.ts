@@ -6,7 +6,7 @@ import fs from "fs";
 dotenv.config({ path: ".env.e2e" });
 
 export const TEST_EMAIL = "e2e-logged-in-test@example.com";
-export const TEST_PASSWORD = "e2epassword123";
+export const TEST_PASSWORD = "E2ePassword123!"; // Meets 12+ char requirement with complexity
 
 async function globalSetup(config: FullConfig) {
   console.log("Starting global setup...");

@@ -66,7 +66,7 @@ test.describe("Account lockout functionality", () => {
 
     // Now we should see the account locked message
     await expect(page.locator('[data-testid="server-error"]')).toContainText(
-      "Account is locked",
+      "Account is locked. Please try again later.",
       { timeout: 10000 }
     );
 
@@ -78,7 +78,7 @@ test.describe("Account lockout functionality", () => {
 
     // Should show account locked message
     await expect(page.locator('[data-testid="server-error"]')).toContainText(
-      "Account is locked",
+      "Account is locked. Please try again later.",
       { timeout: 10000 }
     );
   });
@@ -88,7 +88,7 @@ test.describe("Account lockout functionality", () => {
   }) => {
     // Create a unique email for this test to avoid conflicts
     const uniqueEmail = `test-${Date.now()}@example.com`;
-    const password = "Password123";
+    const password = "Password123!"; // Meets 12+ char requirement
 
     // Register a new user
     await page.goto(`${process.env.E2E_URL}/register`);
@@ -119,7 +119,7 @@ test.describe("Account lockout functionality", () => {
 
     // Verify the account is locked
     await expect(page.locator('[data-testid="server-error"]')).toContainText(
-      "Account is locked",
+      "Account is locked. Please try again later.",
       { timeout: 10000 }
     );
 
@@ -148,7 +148,7 @@ test.describe("Account lockout functionality", () => {
   }) => {
     // Create a unique email for this test
     const uniqueEmail = `test-reset-${Date.now()}@example.com`;
-    const password = "Password123";
+    const password = "Password123!"; // Meets 12+ char requirement
 
     // Register a new user
     await page.goto(`${process.env.E2E_URL}/register`);

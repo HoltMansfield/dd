@@ -7,6 +7,8 @@ export default defineConfig({
   globalSetup: "e2e-tests/global-setup.ts",
   timeout: 60 * 1000,
   reporter: process.env.CI ? "blob" : "html",
+  workers: process.env.CI ? 1 : undefined, // Use all available workers locally, 1 in CI
+  fullyParallel: true, // Run tests in parallel by default
   use: {
     baseURL: process.env.E2E_URL,
     trace: "on-first-retry",
@@ -22,6 +24,8 @@ export default defineConfig({
       name: "mfa",
       testDir: "e2e-tests/mfa",
       use: { storageState: undefined }, // MFA tests manage their own auth
+      fullyParallel: false, // Run MFA tests serially to avoid auth conflicts
+      workers: 1, // Single worker to prevent parallel execution
     },
     {
       name: "logged-in",

@@ -16,7 +16,7 @@ test("secure page redirects to login when not authenticated", async ({
 test("register, login, and logout flow", async ({ page }) => {
   // Generate a unique email for this test
   const uniqueEmail = `test-${Date.now()}@example.com`;
-  const password = "Password123";
+  const password = "Password123!"; // Meets 12+ char requirement
 
   // Go to registration page
   await page.goto(`${process.env.E2E_URL}/register`);

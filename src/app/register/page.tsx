@@ -9,6 +9,7 @@ import ServerError from "@/components/forms/ServerError";
 import SubmitButton from "@/components/forms/SubmitButton";
 import TextInput from "@/components/forms/TextInput";
 import Form from "@/components/forms/Form";
+import PasswordRequirements from "@/components/forms/PasswordRequirements";
 import { redirect } from "next/navigation";
 import {
   Card,
@@ -26,7 +27,8 @@ export default function RegisterPage() {
   const methods = useForm<RegisterFormInputs>({
     resolver: yupResolver(schema),
   });
-  const { handleSubmit } = methods;
+  const { handleSubmit, watch } = methods;
+  const password = watch("password") || "";
 
   const onSubmit = withSentryErrorClient(async (data: RegisterFormInputs) => {
     startTransition(() => {
@@ -63,6 +65,7 @@ export default function RegisterPage() {
                 autoComplete="new-password"
                 disabled={isPending}
               />
+              <PasswordRequirements password={password} />
               {state?.error && <ServerError message={state.error} />}
               <SubmitButton isPending={isPending}>Register</SubmitButton>
             </Form>

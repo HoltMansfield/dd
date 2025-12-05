@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { logoutAction } from "@/actions/auth";
 import { SESSION_TIMEOUT_MS, SESSION_WARNING_MS } from "@/lib/session-config";
 
@@ -14,7 +13,6 @@ import { SESSION_TIMEOUT_MS, SESSION_WARNING_MS } from "@/lib/session-config";
  * - Automatically logs out on timeout
  */
 export default function SessionTimeoutWarning() {
-  const router = useRouter();
   const [showWarning, setShowWarning] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
 

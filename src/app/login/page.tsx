@@ -1,7 +1,13 @@
 "use client";
 import { useForm, FormProvider } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { startTransition, useActionState, useEffect, useState } from "react";
+import {
+  startTransition,
+  useActionState,
+  useEffect,
+  useState,
+  Suspense,
+} from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { withSentryErrorClient } from "@/sentry-error";
 import { loginAction } from "./actions";
@@ -19,7 +25,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [state, formAction, isPending] = useActionState(loginAction, undefined);
@@ -142,5 +148,26 @@ export default function LoginPage() {
         </CardContent>
       </Card>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex flex-col items-center justify-center min-h-screen gap-8">
+          <Card className="max-w-md w-full">
+            <CardHeader>
+              <CardTitle>Login</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8">Loading...</div>
+            </CardContent>
+          </Card>
+        </main>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

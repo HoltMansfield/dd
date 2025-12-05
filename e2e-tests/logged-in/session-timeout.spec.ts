@@ -1,22 +1,12 @@
 import { test, expect } from "@playwright/test";
-import { TEST_EMAIL, TEST_PASSWORD } from "../global-setup";
 
 test.describe("Session Timeout", () => {
   test("should redirect to login after session timeout", async ({
     page,
     context,
   }) => {
-    // Login first
-    await page.goto(`${process.env.E2E_URL}/login`);
-    await page.fill('input[name="email"]', TEST_EMAIL);
-    await page.fill('input[name="password"]', TEST_PASSWORD);
-    await page.click('button[type="submit"]');
-
-    // Wait for redirect to home
-    await page.waitForURL("**/", { timeout: 5000 });
-
-    // Verify we're logged in
-    await expect(page).toHaveURL(`${process.env.E2E_URL}/`);
+    // Start from home page (already logged in via storageState)
+    await page.goto(`${process.env.E2E_URL}/`);
 
     // Get the session timestamp cookie
     const cookies = await context.cookies();
@@ -56,14 +46,8 @@ test.describe("Session Timeout", () => {
     page,
     context,
   }) => {
-    // Login first
-    await page.goto(`${process.env.E2E_URL}/login`);
-    await page.fill('input[name="email"]', TEST_EMAIL);
-    await page.fill('input[name="password"]', TEST_PASSWORD);
-    await page.click('button[type="submit"]');
-
-    // Wait for redirect to home
-    await page.waitForURL("**/", { timeout: 5000 });
+    // Start from home page (already logged in via storageState)
+    await page.goto(`${process.env.E2E_URL}/`);
 
     // Set the session created timestamp to 13 hours ago (past the 12-hour max)
     const thirteenHoursAgo = Date.now() - 13 * 60 * 60 * 1000;
@@ -103,14 +87,8 @@ test.describe("Session Timeout", () => {
     page,
     context,
   }) => {
-    // Login first
-    await page.goto(`${process.env.E2E_URL}/login`);
-    await page.fill('input[name="email"]', TEST_EMAIL);
-    await page.fill('input[name="password"]', TEST_PASSWORD);
-    await page.click('button[type="submit"]');
-
-    // Wait for redirect to home
-    await page.waitForURL("**/", { timeout: 5000 });
+    // Start from home page (already logged in via storageState)
+    await page.goto(`${process.env.E2E_URL}/`);
 
     // Get initial timestamp
     let cookies = await context.cookies();
@@ -137,14 +115,8 @@ test.describe("Session Timeout", () => {
   });
 
   test("should allow session extension via API", async ({ page }) => {
-    // Login first
-    await page.goto(`${process.env.E2E_URL}/login`);
-    await page.fill('input[name="email"]', TEST_EMAIL);
-    await page.fill('input[name="password"]', TEST_PASSWORD);
-    await page.click('button[type="submit"]');
-
-    // Wait for redirect to home
-    await page.waitForURL("**/", { timeout: 5000 });
+    // Start from home page (already logged in via storageState)
+    await page.goto(`${process.env.E2E_URL}/`);
 
     // Call the extend-session API
     const response = await page.request.post(
@@ -158,8 +130,12 @@ test.describe("Session Timeout", () => {
   });
 
   test("should not allow session extension without authentication", async ({
-    page,
+    browser,
   }) => {
+    // Create a new context without auth state
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
     // Try to extend session without being logged in
     const response = await page.request.post(
       `${process.env.E2E_URL}/api/extend-session`
@@ -168,20 +144,16 @@ test.describe("Session Timeout", () => {
 
     const data = await response.json();
     expect(data.error).toBe("No active session");
+
+    await context.close();
   });
 
   test("should preserve session across page navigations", async ({
     page,
     context,
   }) => {
-    // Login first
-    await page.goto(`${process.env.E2E_URL}/login`);
-    await page.fill('input[name="email"]', TEST_EMAIL);
-    await page.fill('input[name="password"]', TEST_PASSWORD);
-    await page.click('button[type="submit"]');
-
-    // Wait for redirect to home
-    await page.waitForURL("**/", { timeout: 5000 });
+    // Start from home page (already logged in via storageState)
+    await page.goto(`${process.env.E2E_URL}/`);
 
     // Navigate to multiple pages
     await page.goto(`${process.env.E2E_URL}/documents`);

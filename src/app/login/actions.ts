@@ -1,11 +1,15 @@
 "use server";
 import { withSentryError } from "@/sentry-error";
 import { cookies } from "next/headers";
-import { db } from "@/db/connect";
-import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
+import { db } from "@/db/connect";
+import { users } from "@/db/schema";
 import { MAX_FAILED_ATTEMPTS, LOCKOUT_DURATION_MS } from "./constants";
+import {
+  SESSION_TIMESTAMP_COOKIE,
+  SESSION_CREATED_COOKIE,
+} from "@/lib/session-config";
 
 async function _loginAction(
   state:
@@ -117,13 +121,20 @@ async function _loginAction(
     email: user.email,
     id: user.id,
   });
-  cookieStore.set("session_user", sessionData, {
+  const now = Date.now();
+  const cookieOptions = {
     path: "/",
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "lax" as const,
     maxAge: 60 * 60 * 24 * 7, // 7 days
-  });
+  };
+
+  cookieStore.set("session_user", sessionData, cookieOptions);
+
+  // Set session timestamps for timeout tracking
+  cookieStore.set(SESSION_TIMESTAMP_COOKIE, now.toString(), cookieOptions);
+  cookieStore.set(SESSION_CREATED_COOKIE, now.toString(), cookieOptions);
 
   // Note: Sentry.setUser() is called on the client-side after successful login via SentryProvider
 

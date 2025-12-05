@@ -1,6 +1,10 @@
 "use server";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import {
+  SESSION_TIMESTAMP_COOKIE,
+  SESSION_CREATED_COOKIE,
+} from "@/lib/session-config";
 
 type SessionData = {
   email: string;
@@ -10,8 +14,10 @@ type SessionData = {
 export async function logoutAction() {
   const cookieStore = await cookies();
 
-  // Clear the session cookie
+  // Clear all session cookies
   cookieStore.delete("session_user");
+  cookieStore.delete(SESSION_TIMESTAMP_COOKIE);
+  cookieStore.delete(SESSION_CREATED_COOKIE);
 
   // Redirect to login page
   redirect("/login");

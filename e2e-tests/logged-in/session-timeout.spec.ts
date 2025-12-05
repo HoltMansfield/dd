@@ -130,14 +130,15 @@ test.describe("Session Timeout", () => {
   });
 
   test("should not allow session extension without authentication", async ({
-    browser,
+    playwright,
   }) => {
-    // Create a new context without auth state
-    const context = await browser.newContext();
-    const page = await context.newPage();
+    // Create a completely fresh request context without any storage state
+    const freshRequest = await playwright.request.newContext({
+      // No storage state, no cookies
+    });
 
     // Try to extend session without being logged in
-    const response = await page.request.post(
+    const response = await freshRequest.post(
       `${process.env.E2E_URL}/api/extend-session`
     );
     expect(response.status()).toBe(401);
@@ -145,7 +146,7 @@ test.describe("Session Timeout", () => {
     const data = await response.json();
     expect(data.error).toBe("No active session");
 
-    await context.close();
+    await freshRequest.dispose();
   });
 
   test("should preserve session across page navigations", async ({

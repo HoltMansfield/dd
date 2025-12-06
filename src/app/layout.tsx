@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 
 import NavBar from "@/components/NavBar";
 import SentryProvider from "@/components/SentryProvider";
+import SessionTimeoutWarning from "@/components/SessionTimeoutWarning";
 
 export default function RootLayout({
   children,
@@ -23,6 +24,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className}`}>
         <NavBar />
+        <SessionTimeoutWarning />
         <SentryProvider>
           <Providers>{children}</Providers>
         </SentryProvider>

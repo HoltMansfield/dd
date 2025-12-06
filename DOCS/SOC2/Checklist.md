@@ -14,7 +14,7 @@ This checklist covers the requirements for SOC2-compliant document storage, focu
 - [x] Enforce principle of least privilege
 - [ ] Require multi-factor authentication (MFA) for access to sensitive documents
 - [x] Maintain access control lists (ACLs) for all document repositories
-- [ ] Implement automatic session timeouts
+- [x] Implement automatic session timeouts
 - [x] Review and revoke access for terminated employees within 24 hours
 - [x] Conduct quarterly access reviews and recertifications
 

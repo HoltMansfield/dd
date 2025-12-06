@@ -5,6 +5,7 @@ import {
   SESSION_TIMESTAMP_COOKIE,
   SESSION_CREATED_COOKIE,
 } from "./lib/session-config";
+import { shouldEnforceMFAForDocuments } from "./lib/mfa-config";
 
 // require authentication
 const protectedPaths = [
@@ -14,6 +15,9 @@ const protectedPaths = [
   "/settings",
   "/documents",
 ];
+
+// paths that require MFA in QA/PROD environments
+const mfaRequiredPaths = ["/documents"];
 
 // no auth required
 const authPaths = ["/login", "/register"];
@@ -102,6 +106,32 @@ export function middleware(request: NextRequest) {
     // Redirect authenticated users away from auth pages to home
     if (isAuthPath) {
       return NextResponse.redirect(new URL("/", request.url));
+    }
+
+    // Check if MFA is required for this path in current environment
+    const isMFARequiredPath = mfaRequiredPaths.some((path) =>
+      pathname.startsWith(path)
+    );
+
+    if (isMFARequiredPath && shouldEnforceMFAForDocuments()) {
+      // Parse session data to check MFA status
+      try {
+        const sessionData = JSON.parse(sessionCookie.value);
+        const userHasMFA = sessionData.mfaEnabled === true;
+
+        // If user doesn't have MFA enabled, redirect to MFA setup
+        if (!userHasMFA) {
+          // Don't redirect if already on settings/security page
+          if (!pathname.startsWith("/settings/security")) {
+            const mfaSetupUrl = new URL("/settings/security", request.url);
+            mfaSetupUrl.searchParams.set("mfa_required", "true");
+            mfaSetupUrl.searchParams.set("redirect", pathname);
+            return NextResponse.redirect(mfaSetupUrl);
+          }
+        }
+      } catch (error) {
+        console.error("[Middleware] Error parsing session data:", error);
+      }
     }
 
     return response;

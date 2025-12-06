@@ -105,6 +105,26 @@ export async function completeMFASetup(
     // Enable MFA
     await enableMFA(userId, secret, backupCodes);
 
+    // Update session cookie to reflect MFA enabled status
+    const { cookies } = await import("next/headers");
+    const { getSessionData } = await import("./auth");
+    const cookieStore = await cookies();
+    const sessionData = await getSessionData();
+
+    if (sessionData) {
+      const updatedSessionData = JSON.stringify({
+        ...sessionData,
+        mfaEnabled: true,
+      });
+      cookieStore.set("session_user", updatedSessionData, {
+        path: "/",
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+      });
+    }
+
     await createAuditLog({
       userId,
       action: "mfa_enabled",
@@ -230,6 +250,26 @@ export async function disableMFAAction(password: string): Promise<{
 
     // Disable MFA
     await disableMFA(userId);
+
+    // Update session cookie to reflect MFA disabled status
+    const { cookies } = await import("next/headers");
+    const { getSessionData } = await import("./auth");
+    const cookieStore = await cookies();
+    const sessionData = await getSessionData();
+
+    if (sessionData) {
+      const updatedSessionData = JSON.stringify({
+        ...sessionData,
+        mfaEnabled: false,
+      });
+      cookieStore.set("session_user", updatedSessionData, {
+        path: "/",
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+      });
+    }
 
     await createAuditLog({
       userId,

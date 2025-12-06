@@ -3,7 +3,11 @@ import { getCurrentUserId } from "../../../actions/auth";
 import { checkMFAStatus } from "../../../actions/mfa";
 import SecuritySettings from "./SecuritySettings";
 
-export default async function SecuritySettingsPage() {
+export default async function SecuritySettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ mfa_required?: string; redirect?: string }>;
+}) {
   const userId = await getCurrentUserId();
 
   if (!userId) {
@@ -11,6 +15,9 @@ export default async function SecuritySettingsPage() {
   }
 
   const { enabled: mfaEnabled } = await checkMFAStatus();
+  const params = await searchParams;
+  const mfaRequired = params.mfa_required === "true";
+  const redirectPath = params.redirect;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -18,7 +25,11 @@ export default async function SecuritySettingsPage() {
         <h1 className="text-3xl font-bold text-gray-900 mb-8">
           Security Settings
         </h1>
-        <SecuritySettings initialMFAEnabled={mfaEnabled} />
+        <SecuritySettings
+          initialMFAEnabled={mfaEnabled}
+          mfaRequired={mfaRequired}
+          redirectPath={redirectPath}
+        />
       </div>
     </div>
   );

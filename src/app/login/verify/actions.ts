@@ -27,10 +27,11 @@ export async function completeMFALogin(): Promise<{
       return { success: false, error: "Invalid MFA session" };
     }
 
-    // Create full session cookie
+    // Create full session cookie with MFA enabled flag
     const sessionData = JSON.stringify({
       email: tempSession.email,
       id: tempSession.userId,
+      mfaEnabled: true, // User just completed MFA, so it's enabled
     });
     const now = Date.now();
     const cookieOptions = {

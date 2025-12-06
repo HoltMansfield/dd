@@ -1,23 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import MFASetup from "../../../components/MFASetup";
 import { disableMFAAction } from "../../../actions/mfa";
 import { getMFAEnforcementMessage } from "../../../lib/mfa-config";
 
 interface SecuritySettingsProps {
   initialMFAEnabled: boolean;
+  mfaRequired?: boolean;
+  redirectPath?: string;
 }
 
 export default function SecuritySettings({
   initialMFAEnabled,
+  mfaRequired = false,
+  redirectPath,
 }: SecuritySettingsProps) {
+  const router = useRouter();
   const [mfaEnabled, setMfaEnabled] = useState(initialMFAEnabled);
   const [showMFASetup, setShowMFASetup] = useState(false);
   const [showDisableConfirm, setShowDisableConfirm] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Auto-open MFA setup if required
+  useEffect(() => {
+    if (mfaRequired && !mfaEnabled) {
+      setShowMFASetup(true);
+    }
+  }, [mfaRequired, mfaEnabled]);
 
   const handleEnableMFA = () => {
     setShowMFASetup(true);
@@ -26,6 +39,11 @@ export default function SecuritySettings({
   const handleMFASetupComplete = () => {
     setShowMFASetup(false);
     setMfaEnabled(true);
+
+    // Redirect to original destination if provided
+    if (redirectPath) {
+      router.push(redirectPath);
+    }
   };
 
   const handleDisableMFA = async () => {
@@ -54,13 +72,49 @@ export default function SecuritySettings({
     return (
       <MFASetup
         onComplete={handleMFASetupComplete}
-        onCancel={() => setShowMFASetup(false)}
+        onCancel={
+          mfaRequired
+            ? undefined // Don't allow cancel if MFA is required
+            : () => setShowMFASetup(false)
+        }
       />
     );
   }
 
   return (
     <div className="space-y-6">
+      {/* MFA Required Banner */}
+      {mfaRequired && !mfaEnabled && (
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-md">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg
+                className="h-5 w-5 text-yellow-400"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-yellow-800">
+                Multi-Factor Authentication Required
+              </h3>
+              <div className="mt-2 text-sm text-yellow-700">
+                <p>
+                  You must enable MFA to access documents. This is required for
+                  security compliance in this environment.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* MFA Section */}
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-start justify-between">

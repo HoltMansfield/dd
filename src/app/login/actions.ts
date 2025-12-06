@@ -115,11 +115,12 @@ async function _loginAction(
     return { requiresMFA: true, userId: user.id };
   }
 
-  // Set session cookie with both email and ID
+  // Set session cookie with email, ID, and MFA status
   const cookieStore = await cookies();
   const sessionData = JSON.stringify({
     email: user.email,
     id: user.id,
+    mfaEnabled: user.mfaEnabled || false,
   });
   const now = Date.now();
   const cookieOptions = {

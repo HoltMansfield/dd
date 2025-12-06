@@ -4,17 +4,25 @@
  */
 
 /**
- * Check if MFA should be enforced
- * In PRODUCTION environment, MFA is always required
+ * Check if MFA should be enforced for document access
+ * In PRODUCTION and QA environments, MFA is required for accessing documents
  */
 export function shouldEnforceMFA(): boolean {
   const env = process.env.NEXT_PUBLIC_APP_ENV;
-  return env === "PRODUCTION";
+  return env === "PRODUCTION" || env === "QA";
+}
+
+/**
+ * Check if MFA enforcement should be applied to document routes
+ * Returns true if the current environment requires MFA for document access
+ */
+export function shouldEnforceMFAForDocuments(): boolean {
+  return shouldEnforceMFA();
 }
 
 /**
  * Check if MFA is available for setup
- * MFA is optional in all environments but required in PRODUCTION
+ * MFA is available in all environments
  */
 export function isMFAAvailable(): boolean {
   return true;
@@ -25,8 +33,8 @@ export function isMFAAvailable(): boolean {
  */
 export function getMFAEnforcementMessage(): string {
   const env = process.env.NEXT_PUBLIC_APP_ENV;
-  if (env !== "PRODUCTION") {
-    return "Multi-factor authentication is optional.";
+  if (env === "PRODUCTION" || env === "QA") {
+    return "Multi-factor authentication is required to access documents.";
   }
-  return "Multi-factor authentication is required.";
+  return "Multi-factor authentication is optional.";
 }

@@ -12,7 +12,7 @@ This checklist covers the requirements for SOC2-compliant document storage, focu
 
 - [x] Implement role-based access control (RBAC) for all documents
 - [x] Enforce principle of least privilege
-- [ ] Require multi-factor authentication (MFA) for access to sensitive documents
+- [x] Require multi-factor authentication (MFA) for access to sensitive documents (enforced in QA/PROD)
 - [x] Maintain access control lists (ACLs) for all document repositories
 - [x] Implement automatic session timeouts
 - [x] Review and revoke access for terminated employees within 24 hours

@@ -16,9 +16,7 @@ import crypto from "crypto";
  *
  * Environment Variables Required:
  * - WEBHOOK_SECRET: Secret for verifying webhook signatures
- * - DEV_DB_URL: Development database connection string
- * - QA_DB_URL: QA database connection string
- * - PROD_DB_URL: Production database connection string
+ * - DB_URL: Database connection string (set different values per deploy context in Netlify UI)
  */
 
 interface NetlifyDeployWebhook {
@@ -114,21 +112,18 @@ function verifyWebhookSignature(
 }
 
 /**
- * Determine which database URL to use based on deploy context
+ * Get database URL from environment
+ *
+ * Note: Netlify automatically provides the correct DB_URL based on deploy context.
+ * You configure different values for the same variable in Netlify UI:
+ * - DB_URL (Production) = your production database
+ * - DB_URL (Deploy Previews) = your dev database
+ * - DB_URL (Branch: qa) = your QA database
+ *
+ * The function automatically gets the right value!
  */
-function getDatabaseUrl(context: string, branch: string): string | null {
-  // Production deploys
-  if (context === "production") {
-    return process.env.PROD_DB_URL || null;
-  }
-
-  // QA branch deploys
-  if (branch === "qa" || branch === "staging") {
-    return process.env.QA_DB_URL || null;
-  }
-
-  // Development/preview deploys
-  return process.env.DEV_DB_URL || null;
+function getDatabaseUrl(): string | null {
+  return process.env.DB_URL || null;
 }
 
 /**
@@ -226,10 +221,10 @@ export const handler: Handler = async (event) => {
     };
   }
 
-  // Get appropriate database URL
-  const dbUrl = getDatabaseUrl(context, branch);
+  // Get database URL (Netlify provides the correct one based on deploy context)
+  const dbUrl = getDatabaseUrl();
   if (!dbUrl) {
-    const error = `No database URL configured for context: ${context}, branch: ${branch}`;
+    const error = `DB_URL not configured for context: ${context}, branch: ${branch}`;
     console.error(error);
     await sendAlert("error", context, branch, error);
     return {

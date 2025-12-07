@@ -5,6 +5,7 @@ import {
   SESSION_TIMESTAMP_COOKIE,
   SESSION_CREATED_COOKIE,
 } from "./lib/session-config";
+import { createAuditLog } from "./lib/audit";
 
 // require authentication
 const protectedPaths = [
@@ -59,6 +60,31 @@ export function middleware(request: NextRequest) {
 
     if (shouldLogout) {
       console.log(`[Session Timeout] ${logoutReason}`);
+
+      // Log session expiration (fire and forget - middleware can't await)
+      try {
+        const sessionData = JSON.parse(sessionCookie.value);
+        createAuditLog({
+          userId: sessionData.id || "unknown",
+          action: "session_expired",
+          success: true,
+          metadata: {
+            reason: logoutReason,
+            email: sessionData.email,
+          },
+        }).catch((error) => {
+          console.error(
+            "[Middleware] Error logging session expiration:",
+            error
+          );
+        });
+      } catch (error) {
+        console.error(
+          "[Middleware] Error parsing session for audit log:",
+          error
+        );
+      }
+
       const response = NextResponse.redirect(
         new URL("/login?timeout=true", request.url)
       );

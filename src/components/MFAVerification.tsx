@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { verifyMFAToken, verifyMFABackupCode } from "../actions/mfa";
 import { shouldEnforceMFA } from "../lib/mfa-config";
+import { withSentryErrorClient } from "@/sentry-error";
 
 interface MFAVerificationProps {
   userId: string;
@@ -21,7 +22,7 @@ export default function MFAVerification({
   const [loading, setLoading] = useState(false);
   const isEnforced = shouldEnforceMFA();
 
-  const handleVerify = async () => {
+  const handleVerify = withSentryErrorClient(async () => {
     if (code.length < 6) {
       setError(
         useBackupCode
@@ -46,7 +47,7 @@ export default function MFAVerification({
     }
 
     setLoading(false);
-  };
+  });
 
   const handleSkip = () => {
     if (!isEnforced && onCancel) {

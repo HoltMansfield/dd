@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { uploadDocument } from "@/actions/documents";
 import { Upload, FileText, Loader2 } from "lucide-react";
+import { withSentryErrorClient } from "@/sentry-error";
 
 export default function DocumentUpload({
   onUploadSuccess,
@@ -23,60 +24,62 @@ export default function DocumentUpload({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log("[DocumentUpload] Form submitted");
-    setError(null);
-    setSuccess(false);
+  const handleSubmit = withSentryErrorClient(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      console.log("[DocumentUpload] Form submitted");
+      setError(null);
+      setSuccess(false);
 
-    if (!selectedFile) {
-      console.log("[DocumentUpload] No file selected");
-      setError("Please select a file");
-      return;
-    }
-
-    console.log(
-      "[DocumentUpload] Starting upload for file:",
-      selectedFile.name
-    );
-    setUploading(true);
-
-    try {
-      const form = e.currentTarget;
-      const formData = new FormData(form);
-      console.log(
-        "[DocumentUpload] FormData created, calling uploadDocument..."
-      );
-      const uploadStartTime = Date.now();
-      const result = await uploadDocument(formData);
-      const uploadDuration = Date.now() - uploadStartTime;
-      console.log("[DocumentUpload] Upload completed in", uploadDuration, "ms");
-      console.log("[DocumentUpload] Result:", result);
-
-      if (result.success) {
-        console.log("[DocumentUpload] Upload successful!");
-        setSuccess(true);
-        setSelectedFile(null);
-        // Reset form
-        form.reset();
-        // Call callback if provided
-        if (onUploadSuccess) {
-          console.log("[DocumentUpload] Calling onUploadSuccess callback");
-          onUploadSuccess();
-        }
-      } else {
-        console.log("[DocumentUpload] Upload failed:", result.error);
-        setError(result.error || "Upload failed");
+      if (!selectedFile) {
+        console.log("[DocumentUpload] No file selected");
+        setError("Please select a file");
+        return;
       }
-    } catch (err) {
-      console.error("[DocumentUpload] Exception during upload:", err);
-      setError("An unexpected error occurred");
-      console.error(err);
-    } finally {
-      setUploading(false);
-      console.log("[DocumentUpload] Upload process finished");
+
+      console.log(
+        "[DocumentUpload] Starting upload for file:",
+        selectedFile.name
+      );
+      setUploading(true);
+
+      try {
+        const form = e.currentTarget;
+        const formData = new FormData(form);
+        console.log(
+          "[DocumentUpload] FormData created, calling uploadDocument..."
+        );
+        const uploadStartTime = Date.now();
+        const result = await uploadDocument(formData);
+        const uploadDuration = Date.now() - uploadStartTime;
+        console.log(
+          "[DocumentUpload] Upload completed in",
+          uploadDuration,
+          "ms"
+        );
+        console.log("[DocumentUpload] Result:", result);
+
+        if (result.success) {
+          console.log("[DocumentUpload] Upload successful!");
+          setSuccess(true);
+          setSelectedFile(null);
+          // Reset form
+          form.reset();
+          // Call callback if provided
+          if (onUploadSuccess) {
+            console.log("[DocumentUpload] Calling onUploadSuccess callback");
+            onUploadSuccess();
+          }
+        } else {
+          console.log("[DocumentUpload] Upload failed:", result.error);
+          setError(result.error || "Upload failed");
+        }
+      } finally {
+        setUploading(false);
+        console.log("[DocumentUpload] Upload process finished");
+      }
     }
-  };
+  );
 
   return (
     <div className="w-full max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">

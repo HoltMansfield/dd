@@ -16,6 +16,7 @@ import {
   Image as ImageIcon,
   FileSpreadsheet,
 } from "lucide-react";
+import { withSentryErrorClient } from "@/sentry-error";
 
 export default function DocumentsList({
   refreshTrigger,
@@ -28,7 +29,7 @@ export default function DocumentsList({
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const loadDocuments = async () => {
+  const loadDocuments = withSentryErrorClient(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -38,63 +39,58 @@ export default function DocumentsList({
       } else {
         setError(result.error || "Failed to load documents");
       }
-    } catch (err) {
-      setError("An unexpected error occurred");
-      console.error(err);
     } finally {
       setLoading(false);
     }
-  };
+  });
 
   useEffect(() => {
     loadDocuments();
   }, [refreshTrigger]);
 
-  const handleDownload = async (documentId: string, fileName: string) => {
-    setDownloadingId(documentId);
-    try {
-      const result = await getDocumentDownloadUrl(documentId);
-      if (result.success && result.url) {
-        // Open download in new tab
-        const link = document.createElement("a");
-        link.href = result.url;
-        link.download = fileName;
-        link.target = "_blank";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } else {
-        alert(result.error || "Failed to download document");
+  const handleDownload = withSentryErrorClient(
+    async (documentId: string, fileName: string) => {
+      setDownloadingId(documentId);
+      try {
+        const result = await getDocumentDownloadUrl(documentId);
+        if (result.success && result.url) {
+          // Open download in new tab
+          const link = document.createElement("a");
+          link.href = result.url;
+          link.download = fileName;
+          link.target = "_blank";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } else {
+          alert(result.error || "Failed to download document");
+        }
+      } finally {
+        setDownloadingId(null);
       }
-    } catch (err) {
-      alert("An unexpected error occurred");
-      console.error(err);
-    } finally {
-      setDownloadingId(null);
     }
-  };
+  );
 
-  const handleDelete = async (documentId: string, fileName: string) => {
-    if (!confirm(`Are you sure you want to delete "${fileName}"?`)) {
-      return;
-    }
-
-    setDeletingId(documentId);
-    try {
-      const result = await deleteDocument(documentId);
-      if (result.success) {
-        // Remove from local state
-        setDocuments((prev) => prev.filter((doc) => doc.id !== documentId));
-      } else {
-        alert(result.error || "Failed to delete document");
+  const handleDelete = withSentryErrorClient(
+    async (documentId: string, fileName: string) => {
+      if (!confirm(`Are you sure you want to delete "${fileName}"?`)) {
+        return;
       }
-    } catch (err) {
-      alert("An unexpected error occurred");
-      console.error(err);
-    } finally {
-      setDeletingId(null);
+
+      setDeletingId(documentId);
+      try {
+        const result = await deleteDocument(documentId);
+        if (result.success) {
+          // Remove from local state
+          setDocuments((prev) => prev.filter((doc) => doc.id !== documentId));
+        } else {
+          alert(result.error || "Failed to delete document");
+        }
+      } finally {
+        setDeletingId(null);
+      }
     }
-  };
+  );
 
   const getFileIcon = (mimeType: string) => {
     if (mimeType.startsWith("image/")) {

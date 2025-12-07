@@ -124,7 +124,7 @@ This checklist covers the requirements for SOC2-compliant document storage, focu
 - [x] Document data retention and disposal policies
 - [ ] Obtain consent for collection and processing of personal data
 - [ ] Provide data subject access request (DSAR) procedures
-- [ ] Implement right to erasure (right to be forgotten)
+- [x] Implement right to erasure (right to be forgotten) - Account deletion with password verification
 - [x] Document data retention and disposal policies
 
 ### 5.2 Data Minimization

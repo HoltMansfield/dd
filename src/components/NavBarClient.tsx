@@ -109,6 +109,12 @@ export default function NavBarClient({ currentUser }: NavBarClientProps) {
             >
               Security
             </Link>
+            <Link
+              href="/settings/account"
+              className="block text-md px-4 ml-2 py-2 rounded text-slate-200 font-bold hover:bg-slate-950 mt-4 lg:mt-0"
+            >
+              Account
+            </Link>
             <button
               onClick={handleLogout}
               data-testid={isMobile ? "logout-mobile" : "logout-desktop"}

@@ -5,6 +5,7 @@ import { uploadDocument } from "@/actions/documents";
 import { Upload, FileText } from "lucide-react";
 import { withSentryErrorClient } from "@/sentry-error";
 import { SubmitButton } from "@/components/forms/SubmitButton";
+import Form from "@/components/forms/Form";
 
 export default function DocumentUpload({
   onUploadSuccess,
@@ -89,7 +90,7 @@ export default function DocumentUpload({
         <h2 className="text-2xl font-bold text-gray-800">Upload Document</h2>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <Form onSubmit={handleSubmit} className="space-y-4">
         {/* File Input */}
         <div>
           <label
@@ -177,7 +178,7 @@ export default function DocumentUpload({
             Upload Document
           </span>
         </SubmitButton>
-      </form>
+      </Form>
     </div>
   );
 }

@@ -146,6 +146,8 @@ export type AuditAction =
   | "revoke"
   | "access_denied"
   | "integrity_check" // Data integrity verification
+  | "account_deleted" // User account deletion (Right to Erasure)
+  | "account_deletion_failed" // Failed account deletion attempt
   | "mfa_setup_initiated"
   | "mfa_setup_failed"
   | "mfa_enabled"

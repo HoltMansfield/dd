@@ -5,14 +5,31 @@ import {
   SESSION_TIMESTAMP_COOKIE,
   SESSION_CREATED_COOKIE,
 } from "@/lib/session-config";
+import { createAuditLog } from "@/lib/audit";
 
 type SessionData = {
   email: string;
   id: string;
+  mfaEnabled?: boolean;
 };
 
 export async function logoutAction() {
   const cookieStore = await cookies();
+
+  // Get session data before clearing for audit log
+  const sessionData = await getSessionData();
+
+  if (sessionData) {
+    // Log logout
+    await createAuditLog({
+      userId: sessionData.id,
+      action: "logout",
+      success: true,
+      metadata: {
+        email: sessionData.email,
+      },
+    });
+  }
 
   // Clear all session cookies
   cookieStore.delete("session_user");

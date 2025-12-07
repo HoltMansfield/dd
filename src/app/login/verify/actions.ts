@@ -1,10 +1,12 @@
 "use server";
-
+import { withSentryError } from "@/sentry-error";
 import { cookies } from "next/headers";
+import { verifyMFAToken } from "@/actions/mfa";
 import {
   SESSION_TIMESTAMP_COOKIE,
   SESSION_CREATED_COOKIE,
 } from "@/lib/session-config";
+import { createAuditLog } from "@/lib/audit";
 
 /**
  * Complete MFA login by converting temporary MFA cookie to full session
@@ -27,10 +29,23 @@ export async function completeMFALogin(): Promise<{
       return { success: false, error: "Invalid MFA session" };
     }
 
-    // Create full session cookie
+    // Log successful MFA completion and login
+    await createAuditLog({
+      userId: tempSession.userId,
+      action: "login_success",
+      success: true,
+      metadata: {
+        email: tempSession.email,
+        mfaRequired: true,
+        mfaCompleted: true,
+      },
+    });
+
+    // Create full session cookie with MFA enabled flag
     const sessionData = JSON.stringify({
       email: tempSession.email,
       id: tempSession.userId,
+      mfaEnabled: true, // User just completed MFA, so it's enabled
     });
     const now = Date.now();
     const cookieOptions = {

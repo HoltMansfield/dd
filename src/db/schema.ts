@@ -150,4 +150,10 @@ export type AuditAction =
   | "mfa_disabled"
   | "mfa_verification"
   | "mfa_backup_code_used"
-  | "mfa_disable_failed";
+  | "mfa_disable_failed"
+  | "login_attempt"
+  | "login_success"
+  | "login_failed"
+  | "logout"
+  | "session_expired"
+  | "account_locked";

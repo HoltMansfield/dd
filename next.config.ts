@@ -7,6 +7,14 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "50mb", // Allow 50MB file uploads
     },
   },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // Ignore pg-cloudflare to prevent webpack errors
+      config.externals = config.externals || [];
+      config.externals.push("pg-cloudflare");
+    }
+    return config;
+  },
   async headers() {
     return [
       {

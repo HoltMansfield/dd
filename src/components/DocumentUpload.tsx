@@ -90,7 +90,7 @@ export default function DocumentUpload({
         <h2 className="text-2xl font-bold text-gray-800">Upload Document</h2>
       </div>
 
-      <Form onSubmit={handleSubmit} className="space-y-4">
+      <Form onSubmit={handleSubmit}>
         {/* File Input */}
         <div>
           <label

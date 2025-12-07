@@ -57,6 +57,13 @@
       "when": 1764642122729,
       "tag": "0007_mighty_night_nurse",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1765139201655,
+      "tag": "0008_flashy_phantom_reporter",
+      "breakpoints": true
     }
   ]
 }

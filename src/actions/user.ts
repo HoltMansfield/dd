@@ -158,6 +158,20 @@ async function _deleteUserAccount(
         "[deleteUserAccount] Failed to create audit log:",
         auditError
       );
+      // Log to Sentry - audit logging failure could indicate database issues
+      if (process.env.NEXT_PUBLIC_APP_ENV !== "E2E") {
+        const Sentry = await import("@sentry/nextjs");
+        Sentry.captureException(auditError, {
+          tags: {
+            context: "account_deletion_audit_log_failure",
+          },
+          extra: {
+            userId,
+            originalError:
+              error instanceof Error ? error.message : String(error),
+          },
+        });
+      }
     }
 
     // Re-throw to let withSentryError wrapper handle Sentry logging

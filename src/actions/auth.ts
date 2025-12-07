@@ -6,6 +6,7 @@ import {
   SESSION_CREATED_COOKIE,
 } from "@/lib/session-config";
 import { createAuditLog } from "@/lib/audit";
+import { withSentryError } from "@/sentry-error";
 
 type SessionData = {
   email: string;
@@ -13,7 +14,7 @@ type SessionData = {
   mfaEnabled?: boolean;
 };
 
-export async function logoutAction() {
+async function _logoutAction() {
   const cookieStore = await cookies();
 
   // Get session data before clearing for audit log
@@ -39,6 +40,8 @@ export async function logoutAction() {
   // Redirect to login page
   redirect("/login");
 }
+
+export const logoutAction = withSentryError(_logoutAction);
 
 /**
  * Get current user email from session

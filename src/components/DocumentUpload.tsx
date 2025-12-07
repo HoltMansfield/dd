@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { uploadDocument } from "@/actions/documents";
-import { Upload, FileText, Loader2 } from "lucide-react";
+import { Upload, FileText } from "lucide-react";
 import { withSentryErrorClient } from "@/sentry-error";
+import { SubmitButton } from "@/components/forms/SubmitButton";
 
 export default function DocumentUpload({
   onUploadSuccess,
@@ -165,28 +166,16 @@ export default function DocumentUpload({
         )}
 
         {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={uploading || !selectedFile}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 
-            bg-blue-600 text-white font-medium rounded-md
-            hover:bg-blue-700 focus:outline-none focus:ring-2 
-            focus:ring-offset-2 focus:ring-blue-500
-            disabled:bg-gray-400 disabled:cursor-not-allowed
-            transition-colors"
+        <SubmitButton
+          isPending={uploading || !selectedFile}
+          pendingText="Uploading..."
+          className="w-full"
         >
-          {uploading ? (
-            <>
-              <Loader2 className="w-5 h-5 animate-spin" />
-              Uploading...
-            </>
-          ) : (
-            <>
-              <Upload className="w-5 h-5" />
-              Upload Document
-            </>
-          )}
-        </button>
+          <span className="flex items-center justify-center gap-2">
+            <Upload className="w-5 h-5" />
+            Upload Document
+          </span>
+        </SubmitButton>
       </form>
     </div>
   );

@@ -228,25 +228,6 @@ Add UI to label documents with sensitivity levels (public, internal, confidentia
 
 ---
 
-### 6. Checksum Migration for Legacy Documents
-
-**Status**: Not Started  
-**Priority**: Low  
-**Effort**: 2-4 hours
-
-**Description**:
-Calculate and store checksums for documents uploaded before integrity verification was implemented.
-
-**Tasks**:
-
-- [ ] Create migration script
-- [ ] Identify documents without checksums
-- [ ] Download and calculate checksums
-- [ ] Update database records
-- [ ] Log migration progress
-
----
-
 ## Completed Items
 
 ### ✅ Data Integrity Verification

@@ -78,7 +78,7 @@ This checklist covers the requirements for SOC2-compliant document storage, focu
 ### 3.1 Data Integrity
 
 - [x] Implement checksums or hash verification for stored documents
-- [ ] Validate data integrity during transfers
+- [x] Validate data integrity during transfers (SHA-256 checksums calculated on upload, verified on demand)
 - [ ] Prevent unauthorized modification of documents
 - [ ] Maintain version control for all documents
 - [x] Log all document modifications with timestamps and user information

@@ -8,6 +8,7 @@ import { createAuditLog } from "@/lib/audit";
 import { eq, and } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import { withSentryError } from "@/sentry-error";
+import { calculateChecksum, verifyIntegrity } from "@/lib/integrity";
 
 const BUCKET_NAME = "documents";
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
@@ -99,6 +100,11 @@ async function _uploadDocument(formData: FormData): Promise<UploadResult> {
     const buffer = Buffer.from(arrayBuffer);
     console.log("[uploadDocument] Buffer size:", buffer.length);
 
+    // Calculate checksum for integrity verification
+    console.log("[uploadDocument] Calculating SHA-256 checksum...");
+    const checksum = calculateChecksum(buffer);
+    console.log("[uploadDocument] Checksum:", checksum);
+
     // Upload to Supabase Storage
     console.log("[uploadDocument] Starting Supabase upload...");
     const uploadStartTime = Date.now();
@@ -140,6 +146,7 @@ async function _uploadDocument(formData: FormData): Promise<UploadResult> {
         storagePath: uploadData.path,
         bucketName: BUCKET_NAME,
         description: description || null,
+        checksum, // Store checksum for integrity verification
       })
       .returning();
 
@@ -245,6 +252,7 @@ async function _getDocumentDownloadUrl(
     success: true,
     metadata: {
       fileName: document.fileName,
+      ...(document.checksum && { checksum: document.checksum }), // Include checksum for audit trail
     },
   });
 
@@ -324,3 +332,118 @@ async function _deleteDocument(
 }
 
 export const deleteDocument = withSentryError(_deleteDocument);
+
+/**
+ * Verify the integrity of a document by comparing its current checksum
+ * with the stored checksum from upload time
+ */
+async function _verifyDocumentIntegrity(documentId: string): Promise<{
+  success: boolean;
+  valid?: boolean;
+  error?: string;
+  details?: {
+    fileName: string;
+    expectedChecksum: string;
+    actualChecksum?: string;
+  };
+}> {
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    return { success: false, error: "Unauthorized. Please log in." };
+  }
+
+  try {
+    // Get document metadata
+    const [document] = await db
+      .select()
+      .from(documents)
+      .where(and(eq(documents.id, documentId), eq(documents.userId, userId)))
+      .limit(1);
+
+    if (!document) {
+      return { success: false, error: "Document not found or access denied" };
+    }
+
+    if (!document.checksum) {
+      return {
+        success: false,
+        error:
+          "Document has no stored checksum (uploaded before integrity verification was implemented)",
+      };
+    }
+
+    // Download the file from storage
+    const { data: fileData, error: downloadError } = await supabaseAdmin.storage
+      .from(document.bucketName)
+      .download(document.storagePath);
+
+    if (downloadError || !fileData) {
+      await createAuditLog({
+        userId,
+        action: "integrity_check",
+        documentId,
+        success: false,
+        errorMessage:
+          downloadError?.message || "Failed to download file for verification",
+      });
+
+      return {
+        success: false,
+        error: "Failed to download file for verification",
+      };
+    }
+
+    // Convert blob to buffer
+    const arrayBuffer = await fileData.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    // Verify integrity
+    const verificationResult = verifyIntegrity(buffer, document.checksum);
+
+    // Create audit log
+    await createAuditLog({
+      userId,
+      action: "integrity_check",
+      documentId,
+      success: true,
+      metadata: {
+        fileName: document.fileName,
+        valid: verificationResult.valid,
+        ...(verificationResult.expectedChecksum && {
+          expectedChecksum: verificationResult.expectedChecksum,
+        }),
+        ...(verificationResult.actualChecksum && {
+          actualChecksum: verificationResult.actualChecksum,
+        }),
+      },
+    });
+
+    return {
+      success: true,
+      valid: verificationResult.valid,
+      details: {
+        fileName: document.fileName,
+        expectedChecksum: verificationResult.expectedChecksum!,
+        actualChecksum: verificationResult.actualChecksum,
+      },
+      ...(verificationResult.error && { error: verificationResult.error }),
+    };
+  } catch (error) {
+    await createAuditLog({
+      userId,
+      action: "integrity_check",
+      documentId,
+      success: false,
+      errorMessage: error instanceof Error ? error.message : "Unknown error",
+    });
+
+    return {
+      success: false,
+      error: `Integrity verification failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+    };
+  }
+}
+
+export const verifyDocumentIntegrity = withSentryError(
+  _verifyDocumentIntegrity
+);

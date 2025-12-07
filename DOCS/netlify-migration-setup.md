@@ -22,13 +22,9 @@ Go to: **Site Settings → Environment Variables**
 
 Add the following variables:
 
-```bash
-# Database URLs for each environment
-DEV_DB_URL=postgresql://user:pass@dev-db.neon.tech/dev_db
-QA_DB_URL=postgresql://user:pass@qa-db.neon.tech/qa_db
-PROD_DB_URL=postgresql://user:pass@prod-db.neon.tech/prod_db
+#### WEBHOOK_SECRET (same for all contexts)
 
-# Webhook security secret (generate a random string)
+```bash
 WEBHOOK_SECRET=your-random-secret-here
 ```
 
@@ -41,6 +37,44 @@ openssl rand -hex 32
 # Or use Node:
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
+
+#### DB_URL (different per deploy context)
+
+Netlify lets you set different values for the same variable based on deploy context!
+
+1. Click "Add variable" → Enter `DB_URL`
+2. Set values for each context:
+
+**Production (main branch):**
+
+```bash
+DB_URL=postgresql://user:pass@prod-db.neon.tech/prod_db
+```
+
+Scope: `Production`
+
+**QA (qa branch):**
+
+```bash
+DB_URL=postgresql://user:pass@qa-db.neon.tech/qa_db
+```
+
+Scope: `Branches` → Select `qa` branch
+
+**Development (all other branches/PRs):**
+
+```bash
+DB_URL=postgresql://user:pass@dev-db.neon.tech/dev_db
+```
+
+Scope: `Deploy Previews` and `Branch deploys`
+
+**How it works:**
+
+- When you deploy to `main`, the function gets the Production DB_URL
+- When you deploy to `qa`, the function gets the QA DB_URL
+- When you deploy a PR, the function gets the Dev DB_URL
+- Netlify handles this automatically! 🎉
 
 ### 2. Deploy the Migration Function
 
@@ -86,14 +120,16 @@ curl -X POST https://your-site.netlify.app/.netlify/functions/run-migration \
 
 ## Environment Mapping
 
-The function determines which database to use based on:
+Netlify automatically provides the correct `DB_URL` based on deploy context:
 
-| Deploy Context   | Branch            | Database Used |
-| ---------------- | ----------------- | ------------- |
-| `production`     | `main`            | `PROD_DB_URL` |
-| `branch-deploy`  | `qa` or `staging` | `QA_DB_URL`   |
-| `deploy-preview` | Any PR            | `DEV_DB_URL`  |
-| `branch-deploy`  | Other branches    | `DEV_DB_URL`  |
+| Deploy Context   | Branch         | DB_URL Value                                  |
+| ---------------- | -------------- | --------------------------------------------- |
+| `production`     | `main`         | Production database (configured in Netlify)   |
+| `branch-deploy`  | `qa`           | QA database (configured for qa branch)        |
+| `deploy-preview` | Any PR         | Dev database (configured for deploy previews) |
+| `branch-deploy`  | Other branches | Dev database (configured for branch deploys)  |
+
+**You don't need to write any code to handle this** - Netlify does it automatically!
 
 ## Migration Workflow
 
@@ -214,12 +250,13 @@ async function sendAlert(type, context, branch, message) {
 2. Make sure it matches between Netlify and your function
 3. Check webhook signature header is being sent
 
-### "No database URL configured" error
+### "DB_URL not configured" error
 
 **Fix:**
 
-1. Add `DEV_DB_URL`, `QA_DB_URL`, `PROD_DB_URL` to environment variables
-2. Redeploy to pick up new environment variables
+1. Add `DB_URL` environment variable in Netlify
+2. Make sure it's configured for the correct deploy context (Production/Deploy Previews/Branches)
+3. Redeploy to pick up new environment variables
 
 ### Migration fails but deploy succeeded
 

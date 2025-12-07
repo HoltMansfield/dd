@@ -10,9 +10,11 @@ Automatically runs database migrations after successful Netlify deploys.
 
    ```
    WEBHOOK_SECRET=<random-32-char-hex>
-   DEV_DB_URL=postgresql://...
-   QA_DB_URL=postgresql://...
-   PROD_DB_URL=postgresql://...
+
+   DB_URL=postgresql://... (set different values per deploy context)
+   - Production: your prod database
+   - Deploy Previews: your dev database
+   - Branch (qa): your QA database
    ```
 
 2. **Configure webhook in Netlify UI:**

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { initializeMFASetup, completeMFASetup } from "../actions/mfa";
 import { getMFAEnforcementMessage } from "../lib/mfa-config";
+import { withSentryErrorClient } from "@/sentry-error";
 
 interface MFASetupProps {
   onComplete?: () => void;
@@ -20,7 +21,7 @@ export default function MFASetup({ onComplete, onCancel }: MFASetupProps) {
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
-  const handleStartSetup = async () => {
+  const handleStartSetup = withSentryErrorClient(async () => {
     setLoading(true);
     setError("");
 
@@ -35,9 +36,9 @@ export default function MFASetup({ onComplete, onCancel }: MFASetupProps) {
     }
 
     setLoading(false);
-  };
+  });
 
-  const handleVerify = async () => {
+  const handleVerify = withSentryErrorClient(async () => {
     if (verificationCode.length !== 6) {
       setError("Please enter a 6-digit code");
       return;
@@ -56,7 +57,7 @@ export default function MFASetup({ onComplete, onCancel }: MFASetupProps) {
     }
 
     setLoading(false);
-  };
+  });
 
   const handleComplete = () => {
     if (onComplete) {

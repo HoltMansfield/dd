@@ -5,6 +5,7 @@ import MFASetup from "../../../components/MFASetup";
 import { disableMFAAction } from "../../../actions/mfa";
 import { getMFAEnforcementMessage } from "../../../lib/mfa-config";
 import { withSentryErrorClient } from "@/sentry-error";
+import { LoadingButton } from "@/components/forms/LoadingButton";
 
 interface SecuritySettingsProps {
   initialMFAEnabled: boolean;
@@ -169,13 +170,16 @@ export default function SecuritySettings({
               >
                 Cancel
               </button>
-              <button
+              <LoadingButton
                 onClick={handleDisableMFA}
-                disabled={loading || !password}
-                className="flex-1 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                isLoading={loading}
+                loadingText="Disabling..."
+                disabled={!password}
+                variant="danger"
+                className="flex-1"
               >
-                {loading ? "Disabling..." : "Disable MFA"}
-              </button>
+                Disable MFA
+              </LoadingButton>
             </div>
           </div>
         </div>

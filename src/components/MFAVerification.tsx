@@ -4,6 +4,7 @@ import { useState } from "react";
 import { verifyMFAToken, verifyMFABackupCode } from "../actions/mfa";
 import { shouldEnforceMFA } from "../lib/mfa-config";
 import { withSentryErrorClient } from "@/sentry-error";
+import { LoadingButton } from "@/components/forms/LoadingButton";
 
 interface MFAVerificationProps {
   userId: string;
@@ -113,13 +114,15 @@ export default function MFAVerification({
           </div>
         )}
 
-        <button
+        <LoadingButton
           onClick={handleVerify}
-          disabled={loading || code.length < 6}
-          className="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          isLoading={loading}
+          loadingText="Verifying..."
+          disabled={code.length < 6}
+          className="w-full"
         >
-          {loading ? "Verifying..." : "Verify"}
-        </button>
+          Verify
+        </LoadingButton>
 
         <div className="text-center">
           <button

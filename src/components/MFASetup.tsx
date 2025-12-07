@@ -4,6 +4,7 @@ import { useState } from "react";
 import { initializeMFASetup, completeMFASetup } from "../actions/mfa";
 import { getMFAEnforcementMessage } from "../lib/mfa-config";
 import { withSentryErrorClient } from "@/sentry-error";
+import { LoadingButton } from "@/components/forms/LoadingButton";
 
 interface MFASetupProps {
   onComplete?: () => void;
@@ -115,13 +116,14 @@ export default function MFASetup({ onComplete, onCancel }: MFASetupProps) {
             </div>
           )}
           <div className="flex gap-3">
-            <button
+            <LoadingButton
               onClick={handleStartSetup}
-              disabled={loading}
-              className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              isLoading={loading}
+              loadingText="Setting up..."
+              className="flex-1"
             >
-              {loading ? "Setting up..." : "Get Started"}
-            </button>
+              Get Started
+            </LoadingButton>
             {onCancel && (
               <button
                 onClick={handleCancel}
@@ -197,13 +199,15 @@ export default function MFASetup({ onComplete, onCancel }: MFASetupProps) {
             >
               Back
             </button>
-            <button
+            <LoadingButton
               onClick={handleVerify}
-              disabled={loading || verificationCode.length !== 6}
-              className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              isLoading={loading}
+              loadingText="Verifying..."
+              disabled={verificationCode.length !== 6}
+              className="flex-1"
             >
-              {loading ? "Verifying..." : "Verify & Enable"}
-            </button>
+              Verify & Enable
+            </LoadingButton>
           </div>
         </div>
       )}

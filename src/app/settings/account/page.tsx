@@ -5,6 +5,7 @@ import { deleteUserAccount } from "@/actions/user";
 import { withSentryErrorClient } from "@/sentry-error";
 import { LoadingButton } from "@/components/forms/LoadingButton";
 import { AlertTriangle, Trash2 } from "lucide-react";
+import Link from "next/link";
 
 export default function AccountSettings() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -151,12 +152,12 @@ export default function AccountSettings() {
 
         {/* Back to Home */}
         <div className="mt-6">
-          <a
+          <Link 
             href="/"
             className="text-blue-600 hover:text-blue-800 text-sm font-medium"
           >
             ← Back to Home
-          </a>
+          </Link>
         </div>
       </div>
     </div>

@@ -157,16 +157,17 @@ await createAuditLog({
 #### Session Expiration
 
 ```typescript
-// In middleware (fire-and-forget pattern)
-createAuditLog({
+// Logged via server action when login page detects timeout parameter
+// (Middleware runs in Edge Runtime and cannot access database)
+await createAuditLog({
   userId: sessionData.id,
   action: "session_expired",
   success: true,
   metadata: {
-    reason: "Session expired due to inactivity",
+    reason: "Session expired (detected on login page)",
     email: sessionData.email,
   },
-}).catch(console.error);
+});
 ```
 
 ### Files Modified
@@ -177,7 +178,9 @@ createAuditLog({
 - `src/app/login/actions.ts` - Login attempt logging
 - `src/app/login/verify/actions.ts` - MFA completion logging
 - `src/actions/auth.ts` - Logout logging
-- `src/middleware.ts` - Session expiration logging
+- `src/app/login/SessionExpirationLogger.tsx` - Session expiration logging
+- `src/app/login/page.tsx` - Triggers session expiration logging on timeout
+- `src/middleware.ts` - Redirects to login with timeout parameter
 
 **Testing & Documentation:**
 

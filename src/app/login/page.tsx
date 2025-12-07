@@ -12,6 +12,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { withSentryErrorClient } from "@/sentry-error";
 import { loginAction } from "./actions";
 import { schema, LoginFormInputs } from "./schema";
+import { logSessionExpiration } from "./SessionExpirationLogger";
 import ServerError from "@/components/forms/ServerError";
 import SubmitButton from "@/components/forms/SubmitButton";
 import TextInput from "@/components/forms/TextInput";
@@ -39,6 +40,8 @@ function LoginForm() {
   useEffect(() => {
     if (searchParams.get("timeout") === "true") {
       setShowTimeoutMessage(true);
+      // Log session expiration
+      logSessionExpiration().catch(console.error);
       // Hide message after 10 seconds
       const timer = setTimeout(() => setShowTimeoutMessage(false), 10000);
       return () => clearTimeout(timer);

@@ -9,7 +9,7 @@ import ServerError from "@/components/forms/ServerError";
 import SubmitButton from "@/components/forms/SubmitButton";
 import TextInput from "@/components/forms/TextInput";
 import Form from "@/components/forms/Form";
-import PasswordRequirements from "@/components/forms/PasswordRequirements";
+import PasswordRequirements from "@/components/ui/PasswordRequirements";
 import { redirect } from "next/navigation";
 import {
   Card,

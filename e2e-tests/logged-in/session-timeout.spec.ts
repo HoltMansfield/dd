@@ -129,29 +129,6 @@ test.describe("Session Timeout", () => {
     expect(data.timestamp).toBeDefined();
   });
 
-  // Note: This test is skipped because testing unauthenticated API access
-  // from within the logged-in test suite is problematic due to storage state.
-  // The API endpoint protection is already validated by the middleware tests.
-  test.skip("should not allow session extension without authentication", async ({
-    playwright,
-  }) => {
-    // Create a completely fresh request context without any storage state
-    const freshRequest = await playwright.request.newContext({
-      // No storage state, no cookies
-    });
-
-    // Try to extend session without being logged in
-    const response = await freshRequest.post(
-      `${process.env.E2E_URL}/api/extend-session`
-    );
-    expect(response.status()).toBe(401);
-
-    const data = await response.json();
-    expect(data.error).toBe("No active session");
-
-    await freshRequest.dispose();
-  });
-
   test("should preserve session across page navigations", async ({
     page,
     context,

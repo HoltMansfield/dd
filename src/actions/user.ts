@@ -160,10 +160,8 @@ async function _deleteUserAccount(
       );
     }
 
-    return {
-      success: false,
-      error: `Failed to delete account: ${error instanceof Error ? error.message : "Unknown error"}`,
-    };
+    // Re-throw to let withSentryError wrapper handle Sentry logging
+    throw error;
   }
 }
 

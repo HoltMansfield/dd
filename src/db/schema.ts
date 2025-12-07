@@ -57,6 +57,7 @@ export const documents = pgTable("documents", {
   bucketName: text("bucketName").notNull().default("documents"),
   uploadedAt: timestamp("uploadedAt", { mode: "date" }).notNull().defaultNow(),
   description: text("description"),
+  checksum: text("checksum"), // SHA-256 checksum for integrity verification
 });
 
 // Audit logs table for SOC2 compliance
@@ -144,6 +145,7 @@ export type AuditAction =
   | "share"
   | "revoke"
   | "access_denied"
+  | "integrity_check" // Data integrity verification
   | "mfa_setup_initiated"
   | "mfa_setup_failed"
   | "mfa_enabled"

@@ -30,7 +30,7 @@ This checklist covers the requirements for SOC2-compliant document storage, focu
 ### 1.3 Authentication & Authorization
 
 - [x] Implement strong password policies (minimum 12 characters, complexity requirements)
-- [ ] Enable MFA for all administrative accounts
+- [x] Enable MFA for all administrative accounts (MFA enforced for all users accessing documents in QA/PROD) - See [mfa-enforcement.md](./mfa-enforcement.md)
 - [x] Log all authentication attempts (successful and failed) - See [authentication-logging.md](./authentication-logging.md)
 - [x] Implement account lockout after failed login attempts
 - [x] Use secure authentication protocols (bcrypt, TOTP/RFC 6238, TLS 1.2+) - See [authentication-protocols.md](./authentication-protocols.md)

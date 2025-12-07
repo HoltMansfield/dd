@@ -167,8 +167,9 @@ export default function DocumentUpload({
 
         {/* Submit Button */}
         <SubmitButton
-          isPending={uploading || !selectedFile}
+          isPending={uploading}
           pendingText="Uploading..."
+          disabled={!selectedFile}
           className="w-full"
         >
           <span className="flex items-center justify-center gap-2">

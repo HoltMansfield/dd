@@ -3,7 +3,7 @@
 ## Command
 
 ```bash
-npm run test:e2e:watch
+npm run test:e2e:headed
 ```
 
 **What this does:**
@@ -21,7 +21,7 @@ npm run test:e2e:watch
 
 ## Workflow
 
-1. **Run tests** - `npm run test:e2e:watch`
+1. **Run tests** - `npm run test:e2e:headed`
 2. **Read terminal output** - See which tests failed and why (error message, stack trace)
 3. **Fix code** - Edit file, save
 4. **Rerun** - Run command again (~5 seconds, no rebuild needed)
@@ -31,7 +31,7 @@ npm run test:e2e:watch
 
 ```typescript
 run_command({
-  CommandLine: "npm run test:e2e:watch",
+  CommandLine: "npm run test:e2e:headed",
   Cwd: "/path/to/project",
   Blocking: true, // Wait for tests to complete
 });

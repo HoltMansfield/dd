@@ -10,8 +10,6 @@ The optimal workflow for E2E test development involves:
 2. Making incremental changes → Playwright detects changes → Tests auto-rerun
 3. See results in real-time without manual reruns
 
-**Note:** `npm run test:e2e` handles everything automatically - you don't need to manually start the dev server or database!
-
 ## Prerequisites
 
 - Node.js and npm installed

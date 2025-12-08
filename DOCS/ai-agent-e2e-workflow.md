@@ -3,27 +3,32 @@
 ## Command
 
 ```bash
-npm run test:e2e -- --ui
+npm run test:e2e -- --headed
 ```
 
-Wait 30 seconds. Playwright UI opens in browser.
+**What this does:**
+
+- Starts database, builds app, starts server (~30 seconds)
+- Runs tests with browser visible
+- **Outputs full error details to terminal** (error message, stack trace, file/line)
+- Exits when done
 
 ## Workflow
 
-1. **Read failure** - Click failed test in UI → See error message, stack trace, screenshot
-2. **Fix code** - Edit file, save
-3. **Watch rerun** - Test reruns automatically in ~5 seconds (no rebuild)
-4. **Repeat** - Until tests pass
+1. **Run tests** - `npm run test:e2e -- --headed`
+2. **Read terminal output** - See which tests failed and why (error message, stack trace)
+3. **Fix code** - Edit file, save
+4. **Rerun** - Run command again (~5 seconds, no rebuild needed)
+5. **Repeat** - Until tests pass
 
 ## For AI Agents
 
 ```typescript
 run_command({
-  CommandLine: "npm run test:e2e -- --ui",
+  CommandLine: "npm run test:e2e -- --headed",
   Cwd: "/path/to/project",
-  Blocking: false,
-  WaitMsBeforeAsync: 30000,
+  Blocking: true, // Wait for tests to complete
 });
 ```
 
-**Key:** Playwright UI shows exactly why tests failed (error, stack trace, screenshot). You can see the failure details without guessing.
+**Key:** Terminal output shows full error details. You can read exactly why tests failed from the command output.

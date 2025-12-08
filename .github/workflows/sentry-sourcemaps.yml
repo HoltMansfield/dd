@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -39,7 +41,7 @@ jobs:
           export SENTRY_RELEASE=$(sentry-cli releases propose-version)
           echo "SENTRY_RELEASE=$SENTRY_RELEASE" >> $GITHUB_ENV
           sentry-cli releases new "$SENTRY_RELEASE"
-          sentry-cli releases set-commits "$SENTRY_RELEASE" --auto
+          sentry-cli releases set-commits "$SENTRY_RELEASE" --auto --ignore-missing
 
       - name: Upload sourcemaps
         run: |

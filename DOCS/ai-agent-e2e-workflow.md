@@ -4,37 +4,17 @@ Quick reference for AI coding agents working with E2E tests.
 
 ## TL;DR
 
-1. Start dev server: `npm run dev` (background process, runs on port 3001)
-2. Run tests in watch mode: `npm run test:e2e -- --ui` (separate process)
-3. Make changes → Playwright detects changes → Tests auto-rerun
-4. Iterate until tests pass
+1. Run tests in watch mode: `npm run test:e2e -- --ui`
+2. Make changes → Playwright detects changes → Tests auto-rerun
+3. Iterate until tests pass
+
+**Note:** `npm run test:e2e` automatically starts the dev server, builds the app, and sets up the test database. You don't need to start anything manually!
 
 ---
 
 ## Complete Workflow
 
-### 1. Check Prerequisites
-
-```bash
-# Check if dev server is already running
-curl http://localhost:3000 -I
-
-# If connection refused, server is not running
-```
-
-### 2. Start Dev Server (if needed)
-
-```bash
-# Start as background/async process
-npm run dev
-
-# Wait 3-5 seconds for server to be ready
-# Verify: curl http://localhost:3000 -I should return 200
-```
-
-**Important:** Keep this process running throughout development!
-
-### 3. Run E2E Tests in Watch Mode
+### 1. Run E2E Tests in Watch Mode
 
 **Option A: UI Mode (RECOMMENDED - auto-reruns on changes)**
 
@@ -73,7 +53,7 @@ npm run test:e2e -- --headed
 npm run test:e2e -- src/e2e-tests/path/to/test.spec.ts --ui
 ```
 
-### 4. Make Changes & Watch Tests Auto-Rerun
+### 2. Make Changes & Watch Tests Auto-Rerun
 
 **The Magic of Watch Mode:**
 
@@ -85,20 +65,17 @@ npm run test:e2e -- src/e2e-tests/path/to/test.spec.ts --ui
 
 **No need to manually rerun tests!** Watch mode handles it automatically.
 
-### 5. Iterate Until Tests Pass
+### 3. Iterate Until Tests Pass
 
 - Make a change → Save → Watch test rerun → See result
 - Fix issues → Save → Watch test rerun → See result
-- Repeat until all tests pass ✅
+- Repeat until all tests pass
 
-### 6. Verify & Clean Up
+### 4. Clean Up
 
 ```bash
-# Run full test suite before committing
-npm run test:e2e
-
-# Stop processes when done
-# Ctrl+C in both terminals
+# Stop watch mode when done
+# Ctrl+C
 ```
 
 ---
@@ -129,38 +106,28 @@ npm run test:e2e -- --workers=4
 
 ## Process Management for AI Agents
 
-### Starting Background Processes
+### Starting Tests
 
 **Using run_command tool with Blocking=false:**
 
 ```typescript
-// Terminal 1: Start dev server (non-blocking)
+// Start tests in watch mode (non-blocking)
+// This automatically starts the server, builds the app, and sets up the test DB
 run_command({
-  CommandLine: "npm run dev",
+  CommandLine: "npm run test:e2e -- --ui",
   Cwd: "/path/to/project",
   Blocking: false,
-  WaitMsBeforeAsync: 5000, // Wait 5s to see if it starts successfully
+  WaitMsBeforeAsync: 10000, // Wait 10s to see if it starts successfully
 });
 
-// Wait for server to be ready
-// Then...
-
-// Terminal 2: Run tests (non-blocking if you want to make changes)
-run_command({
-  CommandLine: "npm run test:e2e -- --headed",
-  Cwd: "/path/to/project",
-  Blocking: false,
-});
+// Now you can make changes and watch tests auto-rerun
 ```
 
 ### Checking Process Status
 
 ```bash
-# Check if dev server is running
-curl http://localhost:3000 -I
-
-# Check for running Node processes
-ps aux | grep "next dev"
+# Check if test server is running
+curl http://localhost:3001 -I
 
 # Check for running Playwright processes
 ps aux | grep playwright
@@ -169,10 +136,7 @@ ps aux | grep playwright
 ### Stopping Processes
 
 ```bash
-# Kill dev server
-pkill -f "next dev"
-
-# Kill Playwright tests
+# Stop watch mode (Ctrl+C or kill process)
 pkill -f "playwright"
 
 # Or use process ID from run_command
@@ -235,8 +199,8 @@ npx playwright show-trace test-results/path/to/trace.zip
 
 **"net::ERR_CONNECTION_REFUSED"**
 
-- Dev server not running
-- Solution: Start `npm run dev`
+- Test server failed to start
+- Solution: Check if port 3001 is already in use, or if the build failed
 
 **"Timeout exceeded"**
 
@@ -288,50 +252,38 @@ let sharedUser; // BAD
 ## Example: Complete AI Agent Workflow with Watch Mode
 
 ```bash
-# 1. Check if server is running
-curl http://localhost:3001 -I
+# 1. Start tests in UI watch mode
+# This automatically starts the server, builds the app, and sets up the test DB
+npm run test:e2e -- src/e2e-tests/logged-in/file-upload.spec.ts --ui
 
-# 2. Start dev server (if needed)
-npm run dev &
-sleep 5
+# Playwright UI opens in browser, watching for changes
 
-# 3. Start tests in UI watch mode
-npm run test:e2e -- src/e2e-tests/logged-in/file-upload.spec.ts --ui &
-
-# Now both processes are running:
-# - Terminal 1: Dev server (port 3001)
-# - Terminal 2: Playwright UI (watching for changes)
-
-# 4. Read error in Playwright UI
+# 2. Read error in Playwright UI
 # Example: "Button not found: text=Upload Document"
 
-# 5. Investigate the code
+# 3. Investigate the code
 cat src/components/DocumentUpload.tsx
 # Find: Button text is "Upload File" not "Upload Document"
 
-# 6. Fix the test
+# 4. Fix the test
 # Edit: src/e2e-tests/logged-in/file-upload.spec.ts
 # Change: await page.click('text=Upload Document');
 # To:     await page.click('text=Upload File');
 # Save the file
 
-# 7. Watch test auto-rerun
+# 5. Watch test auto-rerun
 # Playwright detects the change and reruns automatically
 # No manual rerun needed!
 
-# 8. See it pass in UI
+# 6. See it pass in UI
 # ✓ Test passes
 
-# 9. Make another change if needed
+# 7. Make another change if needed
 # Edit code → Save → Test auto-reruns → See result
 # Repeat until all tests pass
 
-# 10. Run full suite before committing
-npm run test:e2e
-
-# 11. Clean up
-pkill -f "next dev"
-pkill -f "playwright"
+# 8. Clean up
+# Ctrl+C to stop watch mode
 ```
 
 ---
@@ -340,16 +292,13 @@ pkill -f "playwright"
 
 | Task                    | Command                                                 |
 | ----------------------- | ------------------------------------------------------- |
-| Start dev server        | `npm run dev`                                           |
-| Run all tests           | `npm run test:e2e`                                      |
-| Run specific test       | `npm run test:e2e -- path/to/test.spec.ts`              |
 | **Run with UI (watch)** | `npm run test:e2e -- --ui` ⭐ RECOMMENDED               |
 | **Run watch mode**      | `npm run test:e2e -- --watch` ⭐ Auto-reruns on changes |
+| Run all tests           | `npm run test:e2e`                                      |
+| Run specific test       | `npm run test:e2e -- path/to/test.spec.ts`              |
 | Run headed              | `npm run test:e2e -- --headed`                          |
 | Debug test              | `npm run test:e2e -- path/to/test.spec.ts --debug`      |
-| Check server            | `curl http://localhost:3001 -I`                         |
-| Kill server             | `pkill -f "next dev"`                                   |
-| Kill Playwright         | `pkill -f "playwright"`                                 |
+| Stop watch mode         | `Ctrl+C`                                                |
 
 ---
 

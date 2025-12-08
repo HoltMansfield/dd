@@ -1,11 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import { useForm, FormProvider } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import MFASetup from "../../../components/MFASetup";
 import { disableMFAAction } from "../../../actions/mfa";
 import { getMFAEnforcementMessage } from "../../../lib/mfa-config";
 import { withSentryErrorClient } from "@/sentry-error";
-import { LoadingButton } from "@/components/forms/LoadingButton";
+import TextInput from "@/components/forms/TextInput";
+import Form from "@/components/forms/Form";
+
+const disableMFASchema = yup.object({
+  password: yup.string().required("Password is required"),
+});
+
+type DisableMFAFormInputs = yup.InferType<typeof disableMFASchema>;
 
 interface SecuritySettingsProps {
   initialMFAEnabled: boolean;
@@ -17,9 +27,17 @@ export default function SecuritySettings({
   const [mfaEnabled, setMfaEnabled] = useState(initialMFAEnabled);
   const [showMFASetup, setShowMFASetup] = useState(false);
   const [showDisableConfirm, setShowDisableConfirm] = useState(false);
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const methods = useForm<DisableMFAFormInputs>({
+    resolver: yupResolver(disableMFASchema),
+    defaultValues: {
+      password: "",
+    },
+  });
+
+  const { handleSubmit, reset } = methods;
 
   const handleEnableMFA = () => {
     setShowMFASetup(true);
@@ -30,27 +48,24 @@ export default function SecuritySettings({
     setMfaEnabled(true);
   };
 
-  const handleDisableMFA = withSentryErrorClient(async () => {
-    if (!password) {
-      setError("Please enter your password");
-      return;
+  const handleDisableMFA = withSentryErrorClient(
+    async (data: DisableMFAFormInputs) => {
+      setLoading(true);
+      setError("");
+
+      const result = await disableMFAAction(data.password);
+
+      if (result.success) {
+        setMfaEnabled(false);
+        setShowDisableConfirm(false);
+        reset();
+      } else {
+        setError(result.error || "Failed to disable MFA");
+      }
+
+      setLoading(false);
     }
-
-    setLoading(true);
-    setError("");
-
-    const result = await disableMFAAction(password);
-
-    if (result.success) {
-      setMfaEnabled(false);
-      setShowDisableConfirm(false);
-      setPassword("");
-    } else {
-      setError(result.error || "Failed to disable MFA");
-    }
-
-    setLoading(false);
-  });
+  );
 
   if (showMFASetup) {
     return (
@@ -139,48 +154,42 @@ export default function SecuritySettings({
                 ⚠️ Warning: Disabling MFA will make your account less secure.
               </p>
             </div>
-            <p className="text-gray-600 mb-4">
-              Enter your password to confirm:
-            </p>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && password) {
-                  handleDisableMFA();
-                }
-              }}
-              placeholder="Your password"
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none mb-4"
-            />
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
-                <p className="text-sm text-red-800">{error}</p>
-              </div>
-            )}
-            <div className="flex gap-3">
-              <button
-                onClick={() => {
-                  setShowDisableConfirm(false);
-                  setPassword("");
-                  setError("");
-                }}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <LoadingButton
-                onClick={handleDisableMFA}
-                isLoading={loading}
-                loadingText="Disabling..."
-                disabled={!password}
-                variant="danger"
-                className="flex-1"
-              >
-                Disable MFA
-              </LoadingButton>
-            </div>
+            <FormProvider {...methods}>
+              <Form onSubmit={handleSubmit(handleDisableMFA)}>
+                <TextInput
+                  name="password"
+                  type="password"
+                  label="Enter your password to confirm"
+                  placeholder="Your password"
+                  disabled={loading}
+                />
+                {error && (
+                  <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
+                    <p className="text-sm text-red-800">{error}</p>
+                  </div>
+                )}
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowDisableConfirm(false);
+                      reset();
+                      setError("");
+                    }}
+                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+                  >
+                    {loading ? "Disabling..." : "Disable MFA"}
+                  </button>
+                </div>
+              </Form>
+            </FormProvider>
           </div>
         </div>
       )}

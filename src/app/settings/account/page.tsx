@@ -1,42 +1,57 @@
 "use client";
 
 import { useState } from "react";
+import { useForm, FormProvider } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import { deleteUserAccount } from "@/actions/user";
 import { withSentryErrorClient } from "@/sentry-error";
-import { LoadingButton } from "@/components/forms/LoadingButton";
+import TextInput from "@/components/forms/TextInput";
+import Form from "@/components/forms/Form";
 import { AlertTriangle, Trash2 } from "lucide-react";
 import Link from "next/link";
 
+const deleteSchema = yup.object({
+  password: yup.string().required("Password is required"),
+});
+
+type DeleteFormInputs = yup.InferType<typeof deleteSchema>;
+
 export default function AccountSettings() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [password, setPassword] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleDeleteAccount = withSentryErrorClient(async () => {
-    if (!password) {
-      setError("Please enter your password");
-      return;
-    }
+  const methods = useForm<DeleteFormInputs>({
+    resolver: yupResolver(deleteSchema),
+    defaultValues: {
+      password: "",
+    },
+  });
 
-    setDeleteLoading(true);
-    setError(null);
+  const { handleSubmit, reset } = methods;
 
-    try {
-      const result = await deleteUserAccount(password);
+  const handleDeleteAccount = withSentryErrorClient(
+    async (data: DeleteFormInputs) => {
+      setDeleteLoading(true);
+      setError(null);
 
-      if (!result.success) {
-        setError(result.error || "Failed to delete account");
+      try {
+        const result = await deleteUserAccount(data.password);
+
+        if (!result.success) {
+          setError(result.error || "Failed to delete account");
+          setDeleteLoading(false);
+        }
+        // If successful, user will be redirected by the server action
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "An unexpected error occurred"
+        );
         setDeleteLoading(false);
       }
-      // If successful, user will be redirected by the server action
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "An unexpected error occurred"
-      );
-      setDeleteLoading(false);
     }
-  });
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -91,59 +106,58 @@ export default function AccountSettings() {
                     </p>
                   </div>
 
-                  <div className="space-y-4">
-                    <div>
-                      <label
-                        htmlFor="password"
-                        className="block text-sm font-medium text-gray-700 mb-2"
-                      >
-                        Enter your password to confirm
-                      </label>
-                      <input
+                  <FormProvider {...methods}>
+                    <Form
+                      onSubmit={handleSubmit(handleDeleteAccount)}
+                      className="space-y-4"
+                    >
+                      <TextInput
+                        name="password"
                         type="password"
-                        id="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"
+                        label="Enter your password to confirm"
                         placeholder="Your password"
                         disabled={deleteLoading}
                       />
-                    </div>
 
-                    {error && (
-                      <div className="p-3 bg-red-100 border border-red-300 rounded-md">
-                        <p className="text-sm text-red-800">{error}</p>
+                      {error && (
+                        <div className="p-3 bg-red-100 border border-red-300 rounded-md">
+                          <p className="text-sm text-red-800">{error}</p>
+                        </div>
+                      )}
+
+                      <div className="flex gap-3">
+                        <button
+                          type="submit"
+                          disabled={deleteLoading}
+                          className="flex-1 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors disabled:opacity-50"
+                        >
+                          <span className="flex items-center justify-center gap-2">
+                            {deleteLoading ? (
+                              "Deleting..."
+                            ) : (
+                              <>
+                                <Trash2 className="w-4 h-4" />
+                                Yes, Delete My Account
+                              </>
+                            )}
+                          </span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowDeleteConfirm(false);
+                            reset();
+                            setError(null);
+                          }}
+                          disabled={deleteLoading}
+                          className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors disabled:opacity-50"
+                        >
+                          Cancel
+                        </button>
                       </div>
-                    )}
-
-                    <div className="flex gap-3">
-                      <LoadingButton
-                        onClick={handleDeleteAccount}
-                        isLoading={deleteLoading}
-                        loadingText="Deleting..."
-                        disabled={!password}
-                        variant="danger"
-                        className="flex-1"
-                      >
-                        <span className="flex items-center justify-center gap-2">
-                          <Trash2 className="w-4 h-4" />
-                          Yes, Delete My Account
-                        </span>
-                      </LoadingButton>
-
-                      <button
-                        onClick={() => {
-                          setShowDeleteConfirm(false);
-                          setPassword("");
-                          setError(null);
-                        }}
-                        disabled={deleteLoading}
-                        className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors disabled:opacity-50"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
+                    </Form>
+                  </FormProvider>
                 </div>
               )}
             </div>
@@ -152,7 +166,7 @@ export default function AccountSettings() {
 
         {/* Back to Home */}
         <div className="mt-6">
-          <Link 
+          <Link
             href="/"
             className="text-blue-600 hover:text-blue-800 text-sm font-medium"
           >

@@ -6,9 +6,10 @@ This guide explains how to run E2E tests during active development, particularly
 
 The optimal workflow for E2E test development involves:
 
-1. Running the Next.js dev server in one terminal (watch mode)
-2. Running Playwright tests in another terminal (watch mode)
-3. Making incremental changes and watching tests pass/fail in real-time
+1. Running the Next.js dev server in one terminal (serves on port 3001)
+2. Running Playwright tests in watch mode in another terminal
+3. Making incremental changes → Playwright detects changes → Tests auto-rerun
+4. See results in real-time without manual reruns
 
 ## Prerequisites
 
@@ -48,6 +49,8 @@ npm run dev
 
 ### Terminal 2: Run E2E Tests in Watch Mode
 
+**RECOMMENDED: UI Mode with Watch**
+
 ```bash
 npm run test:e2e -- --ui
 ```
@@ -55,28 +58,39 @@ npm run test:e2e -- --ui
 **What this does:**
 
 - Opens Playwright UI in your browser
-- Watches for test file changes
-- Re-runs tests automatically when files change
+- **Watches for file changes** (code, tests, components, etc.)
+- **Automatically reruns tests** when you save changes
 - Shows test results in real-time
 - Allows you to debug individual tests
+- **No manual rerun needed!**
 
-**Alternative: Run tests in headed mode (see browser)**
+**Alternative: Watch mode in terminal (no UI)**
+
+```bash
+npm run test:e2e -- --watch
+```
+
+- Same auto-rerun behavior
+- Output in terminal instead of browser UI
+
+**Alternative: Headed mode (manual rerun)**
 
 ```bash
 npm run test:e2e -- --headed
 ```
 
-**Alternative: Run specific test file**
+- Shows browser but doesn't watch for changes
+- You must manually rerun after each change
+- Good for one-off debugging
+
+**Alternative: Run specific test file in watch mode**
 
 ```bash
 npm run test:e2e -- src/e2e-tests/logged-in/file-upload.spec.ts --ui
 ```
 
-**Alternative: Run tests continuously without UI**
-
-```bash
-npm run test:e2e -- --watch
-```
+- Focuses on one test file
+- Still watches for changes and auto-reruns
 
 ---
 

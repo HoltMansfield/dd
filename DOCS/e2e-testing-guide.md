@@ -6,48 +6,22 @@ This guide explains how to run E2E tests during active development, particularly
 
 The optimal workflow for E2E test development involves:
 
-1. Running the Next.js dev server in one terminal (serves on port 3001)
-2. Running Playwright tests in watch mode in another terminal
-3. Making incremental changes → Playwright detects changes → Tests auto-rerun
-4. See results in real-time without manual reruns
+1. Running `npm run test:e2e -- --ui` (automatically starts server, builds app, sets up test DB)
+2. Making incremental changes → Playwright detects changes → Tests auto-rerun
+3. See results in real-time without manual reruns
+
+**Note:** `npm run test:e2e` handles everything automatically - you don't need to manually start the dev server or database!
 
 ## Prerequisites
 
 - Node.js and npm installed
 - Dependencies installed (`npm install`)
-- Database running and migrated
-- Environment variables configured in `.env.local`
+- Docker installed (for E2E test database)
+- Environment variables configured in `.env.e2e`
 
-## Two-Terminal Workflow
+## Workflow
 
-### Terminal 1: Start the Development Server
-
-```bash
-npm run dev
-```
-
-**What this does:**
-
-- Starts Next.js dev server on `http://localhost:3000`
-- Enables hot module reloading (HMR)
-- Watches for file changes and rebuilds automatically
-- Keeps running until you stop it (Ctrl+C)
-
-**Expected output:**
-
-```
-  ▲ Next.js 14.x.x
-  - Local:        http://localhost:3000
-  - Environments: .env.local
-
- ✓ Ready in 2.3s
-```
-
-**Leave this terminal running!**
-
----
-
-### Terminal 2: Run E2E Tests in Watch Mode
+### Run E2E Tests in Watch Mode
 
 **RECOMMENDED: UI Mode with Watch**
 
@@ -57,12 +31,17 @@ npm run test:e2e -- --ui
 
 **What this does:**
 
+- Starts E2E database (Docker PostgreSQL)
+- Creates database schema (migrations)
+- Builds the Next.js app
+- Starts server on port 3001
 - Opens Playwright UI in your browser
 - **Watches for file changes** (code, tests, components, etc.)
 - **Automatically reruns tests** when you save changes
 - Shows test results in real-time
 - Allows you to debug individual tests
 - **No manual rerun needed!**
+- Cleans up database when you stop (Ctrl+C)
 
 **Alternative: Watch mode in terminal (no UI)**
 
@@ -96,49 +75,33 @@ npm run test:e2e -- src/e2e-tests/logged-in/file-upload.spec.ts --ui
 
 ## For AI Agents: Step-by-Step Instructions
 
-### Initial Setup
+### Start Tests
 
-1. **Check if dev server is already running:**
-
-   ```bash
-   curl http://localhost:3000 -I
-   ```
-
-   - If you get a response, server is running
-   - If connection refused, you need to start it
-
-2. **Start dev server (if not running):**
+1. **Run tests in watch mode:**
 
    ```bash
-   npm run dev
+   npm run test:e2e -- --ui
    ```
 
-   - Run this as a background/async process
-   - Wait 3-5 seconds for server to be ready
-   - Verify it's running: `curl http://localhost:3000 -I`
-
-3. **Start E2E tests:**
-   ```bash
-   npm run test:e2e -- --headed
-   ```
-   - Run this as a separate background/async process
-   - Tests will run against `http://localhost:3000`
+   - This automatically starts everything (database, server, tests)
+   - Run as a background/async process
+   - Wait 10-15 seconds for everything to start
+   - Playwright UI will open in browser
 
 ### Making Changes
 
-1. **Edit code files** (components, pages, server actions, etc.)
-2. **Dev server automatically rebuilds** (watch Terminal 1 for rebuild messages)
-3. **Re-run tests manually or wait for watch mode to detect changes**
-4. **Check test results** in Terminal 2
+1. **Edit code files** (components, pages, server actions, tests, etc.)
+2. **Save the file**
+3. **Playwright detects the change and automatically reruns tests**
+4. **See results immediately in Playwright UI**
 5. **Repeat until tests pass**
 
-### Stopping Processes
+**No manual rerun needed!** Watch mode handles it automatically.
+
+### Stopping Process
 
 ```bash
-# Stop dev server (Terminal 1)
-Ctrl+C
-
-# Stop E2E tests (Terminal 2)
+# Stop watch mode (stops everything: tests, server, database)
 Ctrl+C
 ```
 
@@ -218,12 +181,13 @@ src/e2e-tests/
 
 ## Environment Variables for E2E Tests
 
-E2E tests use `.env.local` with special E2E-specific values:
+E2E tests use `.env.e2e` with E2E-specific configuration:
 
 ```bash
-# .env.local (for E2E testing)
+# .env.e2e (for E2E testing)
+E2E_URL=http://localhost:3001
+DB_URL=postgresql://test:test@localhost:5433/testdb-dd
 NEXT_PUBLIC_APP_ENV=E2E
-DB_URL=postgresql://...your-test-db...
 SUPABASE_URL=...
 SUPABASE_SERVICE_ROLE_KEY=...
 ```
@@ -231,8 +195,9 @@ SUPABASE_SERVICE_ROLE_KEY=...
 **Important:**
 
 - `NEXT_PUBLIC_APP_ENV=E2E` disables certain features (like Sentry) during tests
-- Use a separate test database to avoid polluting dev data
+- E2E database runs in Docker on port 5433 (separate from dev database)
 - Tests will create/delete test users automatically
+- Server runs on port 3001 (separate from dev server on 3000)
 
 ---
 
@@ -296,16 +261,25 @@ npx playwright show-trace test-results/path/to/trace.zip
 
 ### Issue: "Error: page.goto: net::ERR_CONNECTION_REFUSED"
 
-**Cause:** Dev server is not running
+**Cause:** Test server failed to start
+
+**Possible reasons:**
+
+- Port 3001 is already in use
+- Build failed
+- Docker database failed to start
 
 **Solution:**
 
 ```bash
-# Start dev server in Terminal 1
-npm run dev
+# Check if port 3001 is in use
+lsof -i :3001
 
-# Wait for "Ready in X.Xs" message
-# Then run tests in Terminal 2
+# Check if Docker is running
+docker ps
+
+# Try running tests again
+npm run test:e2e
 ```
 
 ---

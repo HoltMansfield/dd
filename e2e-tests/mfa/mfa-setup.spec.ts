@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { openMenu } from "../helpers";
 import {
   disableMFAForTestUser,
   checkMFAStatus,
@@ -58,6 +59,7 @@ test.describe("MFA - Setup and Management", () => {
     await page.fill('input[name="email"]', TEST_USER.email);
     await page.fill('input[name="password"]', TEST_USER.password);
     await page.click('button[type="submit"]');
+    await page.waitForURL("/", { timeout: 10000 });
     await expect(page).toHaveURL("/");
   });
 
@@ -68,8 +70,9 @@ test.describe("MFA - Setup and Management", () => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    // Click Security link in navbar (use .last() to get the desktop version)
-    await page.locator('a[href="/settings/security"]').last().click();
+    // Open drawer and click Security link
+    await openMenu(page);
+    await page.locator('a[href="/settings/security"]').click();
 
     // Should be on security settings page
     await expect(page).toHaveURL("/settings/security");

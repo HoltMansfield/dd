@@ -98,7 +98,8 @@ test.describe("MFA - Login Flow", () => {
     await page.fill('input[name="password"]', TEST_USER.password);
     await page.click('button[type="submit"]');
 
-    // Should redirect to MFA verification page
+    // Wait for the client-side redirect to MFA verification page
+    await page.waitForURL(/\/login\/verify/, { timeout: 10000 });
     await expect(page).toHaveURL(/\/login\/verify/);
     console.log("Redirected to MFA verification");
 
@@ -131,6 +132,7 @@ test.describe("MFA - Login Flow", () => {
     await page.click('button[type="submit"]');
 
     // Wait for MFA page
+    await page.waitForURL(/\/login\/verify/, { timeout: 10000 });
     await expect(page).toHaveURL(/\/login\/verify/);
 
     // Generate valid TOTP code
@@ -170,6 +172,7 @@ test.describe("MFA - Login Flow", () => {
     await page.click('button[type="submit"]');
 
     // Wait for MFA page
+    await page.waitForURL(/\/login\/verify/, { timeout: 10000 });
     await expect(page).toHaveURL(/\/login\/verify/);
 
     // Enter invalid code
@@ -208,6 +211,7 @@ test.describe("MFA - Login Flow", () => {
     await page.click('button[type="submit"]');
 
     // Wait for MFA page
+    await page.waitForURL(/\/login\/verify/, { timeout: 10000 });
     await expect(page).toHaveURL(/\/login\/verify/);
 
     // Switch to backup code
@@ -257,6 +261,7 @@ test.describe("MFA - Login Flow", () => {
     await page.fill('input[name="email"]', TEST_USER.email);
     await page.fill('input[name="password"]', TEST_USER.password);
     await page.click('button[type="submit"]');
+    await page.waitForURL(/\/login\/verify/, { timeout: 10000 });
     await expect(page).toHaveURL(/\/login\/verify/);
     await page.click("text=Use backup code instead");
     await page.fill('input[type="text"]', TEST_BACKUP_CODES[0]);
@@ -271,14 +276,17 @@ test.describe("MFA - Login Flow", () => {
     expect(afterCount).toBe(2);
     console.log(`Backup codes after use: ${afterCount}`);
 
-    // Logout (click the visible logout button)
-    await page.locator('button:has-text("Logout")').last().click();
+    // Logout (open drawer and click logout button)
+    await page.locator('button[aria-label="Open Menu"]').first().click();
+    await page.waitForTimeout(300);
+    await page.locator('button:has-text("Logout")').click();
     await expect(page).toHaveURL("/login");
 
     // Try to use same backup code again
     await page.fill('input[name="email"]', TEST_USER.email);
     await page.fill('input[name="password"]', TEST_USER.password);
     await page.click('button[type="submit"]');
+    await page.waitForURL(/\/login\/verify/, { timeout: 10000 });
     await expect(page).toHaveURL(/\/login\/verify/);
     await page.click("text=Use backup code instead");
     await page.fill('input[type="text"]', TEST_BACKUP_CODES[0]);
@@ -315,6 +323,7 @@ test.describe("MFA - Login Flow", () => {
     await page.click('button[type="submit"]');
 
     // Wait for MFA page
+    await page.waitForURL(/\/login\/verify/, { timeout: 10000 });
     await expect(page).toHaveURL(/\/login\/verify/);
 
     // Should see skip button in non-PRODUCTION environment
@@ -354,6 +363,7 @@ test.describe("MFA - Login Flow", () => {
     await page.click('button[type="submit"]');
 
     // Wait for MFA page
+    await page.waitForURL(/\/login\/verify/, { timeout: 10000 });
     await expect(page).toHaveURL(/\/login\/verify/);
 
     // Try to access verification page directly without userId

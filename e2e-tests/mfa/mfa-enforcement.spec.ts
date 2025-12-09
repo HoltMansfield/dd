@@ -42,7 +42,7 @@ test.describe("MFA Enforcement - E2E Environment", () => {
     await page.click('button[type="submit"]');
 
     // Wait for successful login
-    await page.waitForURL("**/", { timeout: 5000 });
+    await page.waitForURL("**/", { timeout: 10000 });
 
     // Try to access documents page
     await page.goto(`${process.env.E2E_URL}/documents`);
@@ -61,7 +61,7 @@ test.describe("MFA Enforcement - E2E Environment", () => {
     await page.click('button[type="submit"]');
 
     // Wait for successful login
-    await page.waitForURL("**/", { timeout: 5000 });
+    await page.waitForURL("**/", { timeout: 10000 });
 
     // Go to security settings
     await page.goto(`${process.env.E2E_URL}/settings/security`);

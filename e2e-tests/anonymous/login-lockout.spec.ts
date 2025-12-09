@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { openMenu } from "../helpers";
 import { TEST_EMAIL, TEST_PASSWORD } from "../global-setup";
 
 // Import constants to ensure tests match implementation
@@ -45,26 +46,29 @@ test.describe("Account lockout functionality", () => {
         .textContent();
       console.log(`Attempt ${i} error message: ${errorText}`);
 
-      // For the last attempt, we expect either an 'Account is locked' message or 'Invalid credentials'
-      // For earlier attempts, we expect 'Invalid credentials'
+      // On the last attempt, account should be locked
       if (i === MAX_FAILED_ATTEMPTS) {
-        // The account might already be locked from previous test runs
-        await expect(page.locator('[data-testid="server-error"]')).toBeVisible({
+        await expect(
+          page.locator('[data-testid="server-error"]')
+        ).toContainText("Account is locked. Please try again later.", {
           timeout: 5000,
         });
+      } else {
+        // For earlier attempts, we expect 'Invalid credentials'
+        await expect(
+          page.locator('[data-testid="server-error"]')
+        ).toContainText("Invalid credentials", { timeout: 5000 });
       }
     }
 
-    // Now make one more attempt after the account should be locked
-    console.log(
-      `Making one more attempt after ${MAX_FAILED_ATTEMPTS} failed attempts`
-    );
+    // Verify account is still locked on subsequent attempt
+    console.log("Verifying account remains locked on subsequent attempt");
     await page.fill('input[name="email"]', TEST_EMAIL);
     await page.fill('input[name="password"]', "wrong-password");
     await page.click('button[type="submit"]');
     await page.waitForTimeout(500);
 
-    // Now we should see the account locked message
+    // Should still see the account locked message
     await expect(page.locator('[data-testid="server-error"]')).toContainText(
       "Account is locked. Please try again later.",
       { timeout: 10000 }
@@ -136,8 +140,15 @@ test.describe("Account lockout functionality", () => {
       await page.goto(`${process.env.E2E_URL}/`);
     }
 
-    // Verify we're on the home page by checking for the logout button
-    await expect(page.locator('[data-testid="logout-desktop"]')).toBeVisible({
+    // Verify we're on the home page by opening drawer and checking for logout button
+    await openMenu(page);
+    await expect(
+      page
+        .locator(
+          '[data-testid="logout-desktop"], [data-testid="logout-mobile"]'
+        )
+        .first()
+    ).toBeVisible({
       timeout: 10000,
     });
   });
@@ -198,13 +209,23 @@ test.describe("Account lockout functionality", () => {
       await page.goto(`${process.env.E2E_URL}/`);
     }
 
-    // Verify we're on the home page by checking for the logout button
-    await expect(page.locator('[data-testid="logout-desktop"]')).toBeVisible({
+    // Verify we're on the home page by opening drawer and checking for logout button
+    await openMenu(page);
+    await expect(
+      page
+        .locator(
+          '[data-testid="logout-desktop"], [data-testid="logout-mobile"]'
+        )
+        .first()
+    ).toBeVisible({
       timeout: 10000,
     });
 
     // Logout
-    await page.click('[data-testid="logout-desktop"]');
+    await page
+      .locator('[data-testid="logout-desktop"], [data-testid="logout-mobile"]')
+      .first()
+      .click();
     await page.waitForTimeout(1000);
 
     // Ensure we're on the login page

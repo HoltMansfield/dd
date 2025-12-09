@@ -207,6 +207,8 @@ test.describe("Authentication Audit Logging", () => {
 
     // Logout
     await page.goto(`${process.env.E2E_URL}/profile`);
+    await page.locator('button[aria-label="Open Menu"]').first().click();
+    await page.waitForTimeout(300);
     await page.click('button:has-text("Logout")');
 
     // Wait for redirect to login
@@ -277,6 +279,8 @@ test.describe("Authentication Audit Logging", () => {
 
     // 3. Logout
     await page.goto(`${process.env.E2E_URL}/profile`);
+    await page.locator('button[aria-label="Open Menu"]').first().click();
+    await page.waitForTimeout(300);
     await page.click('button:has-text("Logout")');
     await page.waitForURL("**/login", { timeout: 5000 });
 

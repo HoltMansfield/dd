@@ -7,7 +7,7 @@ export const sendWelcomeEmail = async (email: string) => {
   await resend.emails.send({
     from: "no-reply@classAcampW.com",
     to: email,
-    subject: "Welocome to Class Deal Decoder",
+    subject: "Welcome to Deal Decoder",
     react: <StripeWelcomeEmail />,
   });
 };

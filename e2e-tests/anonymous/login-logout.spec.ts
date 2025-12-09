@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { TEST_EMAIL, TEST_PASSWORD } from "../global-setup";
+import { logout } from "../helpers";
 
 test("secure page redirects to login when not authenticated", async ({
   page,
@@ -49,8 +50,8 @@ test("register, login, and logout flow", async ({ page }) => {
   const pageContent = await page.content();
   expect(pageContent).toContain("Logout");
 
-  // Find and click the logout button (use desktop version which is visible)
-  await page.click('[data-testid="logout-desktop"]');
+  // Logout using helper function
+  await logout(page);
 
   // Wait for redirect to login page
   await page.waitForURL("**/login", { timeout: 10000 });

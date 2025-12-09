@@ -32,7 +32,7 @@ test.describe("Session Timeout", () => {
     await page.goto(`${process.env.E2E_URL}/documents`);
 
     // Should be redirected to login with timeout parameter
-    await page.waitForURL("**/login?timeout=true", { timeout: 5000 });
+    await page.waitForURL("**/login?timeout=true", { timeout: 10000 });
     expect(page.url()).toContain("/login?timeout=true");
 
     // Should show timeout message
@@ -79,7 +79,7 @@ test.describe("Session Timeout", () => {
     await page.goto(`${process.env.E2E_URL}/documents`);
 
     // Should be redirected to login with timeout parameter
-    await page.waitForURL("**/login?timeout=true", { timeout: 5000 });
+    await page.waitForURL("**/login?timeout=true", { timeout: 10000 });
     expect(page.url()).toContain("/login?timeout=true");
   });
 

@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { openMenu, logout } from "../helpers";
 import { db } from "../../src/db/connect";
 import { users, auditLogs } from "../../src/db/schema";
 import { eq, and, desc } from "drizzle-orm";
@@ -206,10 +207,7 @@ test.describe("Authentication Audit Logging", () => {
     await page.waitForURL("**/", { timeout: 5000 });
 
     // Logout
-    await page.goto(`${process.env.E2E_URL}/profile`);
-    await page.locator('button[aria-label="Open Menu"]').first().click();
-    await page.waitForTimeout(300);
-    await page.click('button:has-text("Logout")');
+    await logout(page);
 
     // Wait for redirect to login
     await page.waitForURL("**/login", { timeout: 5000 });
@@ -278,10 +276,7 @@ test.describe("Authentication Audit Logging", () => {
     await page.waitForURL("**/", { timeout: 5000 });
 
     // 3. Logout
-    await page.goto(`${process.env.E2E_URL}/profile`);
-    await page.locator('button[aria-label="Open Menu"]').first().click();
-    await page.waitForTimeout(300);
-    await page.click('button:has-text("Logout")');
+    await logout(page);
     await page.waitForURL("**/login", { timeout: 5000 });
 
     // Get all logs for this user

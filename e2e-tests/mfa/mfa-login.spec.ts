@@ -6,6 +6,7 @@ import {
   checkMFAStatus,
   getBackupCodesCount,
 } from "../fixtures/mfa-test-helpers";
+import { logout } from "../helpers";
 
 // Test user credentials
 const TEST_USER = {
@@ -276,10 +277,9 @@ test.describe("MFA - Login Flow", () => {
     expect(afterCount).toBe(2);
     console.log(`Backup codes after use: ${afterCount}`);
 
-    // Logout (open drawer and click logout button)
-    await page.locator('button[aria-label="Open Menu"]').first().click();
-    await page.waitForTimeout(300);
-    await page.locator('button:has-text("Logout")').click();
+    // Logout using helper
+    await logout(page);
+    await page.waitForURL("/login", { timeout: 10000 });
     await expect(page).toHaveURL("/login");
 
     // Try to use same backup code again

@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { openMenu } from "../helpers";
+import { openMenu, waitForVisibleLogoutButton, logout } from "../helpers";
 import { TEST_EMAIL, TEST_PASSWORD } from "../global-setup";
 
 // Import constants to ensure tests match implementation
@@ -140,17 +140,9 @@ test.describe("Account lockout functionality", () => {
       await page.goto(`${process.env.E2E_URL}/`);
     }
 
-    // Verify we're on the home page by opening drawer and checking for logout button
+    // Verify we're on the home page by opening drawer and checking for a visible logout button
     await openMenu(page);
-    await expect(
-      page
-        .locator(
-          '[data-testid="logout-desktop"], [data-testid="logout-mobile"]'
-        )
-        .first()
-    ).toBeVisible({
-      timeout: 10000,
-    });
+    await waitForVisibleLogoutButton(page, 10000);
   });
 
   test("should reset failed attempts after successful login", async ({
@@ -209,32 +201,9 @@ test.describe("Account lockout functionality", () => {
       await page.goto(`${process.env.E2E_URL}/`);
     }
 
-    // Verify we're on the home page by opening drawer and checking for logout button
-    await openMenu(page);
-    await expect(
-      page
-        .locator(
-          '[data-testid="logout-desktop"], [data-testid="logout-mobile"]'
-        )
-        .first()
-    ).toBeVisible({
-      timeout: 10000,
-    });
-
-    // Logout
-    await page
-      .locator('[data-testid="logout-desktop"], [data-testid="logout-mobile"]')
-      .first()
-      .click();
-    await page.waitForTimeout(1000);
-
-    // Ensure we're on the login page
-    if (!page.url().includes("/login")) {
-      await page.goto(`${process.env.E2E_URL}/login`);
-    }
-    await expect(page).toHaveURL(`${process.env.E2E_URL}/login`, {
-      timeout: 10000,
-    });
+    // Logout via helper and ensure we land on login
+    await logout(page);
+    await page.waitForURL("**/login", { timeout: 20000 });
 
     // Now we should be able to make MAX_FAILED_ATTEMPTS failed attempts again because the counter should have been reset
     for (let i = 1; i <= attemptsToMake; i++) {

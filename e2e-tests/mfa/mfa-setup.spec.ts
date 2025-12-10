@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { openMenu } from "../helpers";
+import { clickMenuLink } from "../helpers";
 import {
   disableMFAForTestUser,
   checkMFAStatus,
@@ -70,9 +70,8 @@ test.describe("MFA - Setup and Management", () => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    // Open drawer and click Security link
-    await openMenu(page);
-    await page.locator('a[href="/settings/security"]').click();
+    // Open drawer and click Security link (click visible element in the open drawer)
+    await clickMenuLink(page, "/settings/security");
 
     // Should be on security settings page
     await expect(page).toHaveURL("/settings/security");

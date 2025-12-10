@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { TEST_EMAIL, TEST_PASSWORD } from "../global-setup";
-import { logout } from "../helpers";
+import { logout, openMenu, waitForVisibleLogoutButton } from "../helpers";
 
 test("secure page redirects to login when not authenticated", async ({
   page,
@@ -46,9 +46,9 @@ test("register, login, and logout flow", async ({ page }) => {
   // Manually navigate to home page if not redirected
   await page.goto(`${process.env.E2E_URL}/`);
 
-  // Check if we're logged in by looking for any content that should be on the home page
-  const pageContent = await page.content();
-  expect(pageContent).toContain("Logout");
+  // Check if we're logged in by opening the menu and looking for logout button
+  await openMenu(page);
+  await waitForVisibleLogoutButton(page, 10000);
 
   // Logout using helper function
   await logout(page);

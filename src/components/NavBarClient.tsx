@@ -109,86 +109,81 @@ export default function NavBarClient({ currentUser }: NavBarClientProps) {
     };
   }, [userMenuOpen]);
 
-  const MenuItems = ({ isMobile = false }: { isMobile?: boolean }) => (
-    <>
-      <div className="text-md font-bold lg:flex-grow">
-        <button
-          type="button"
-          data-testid="nav-menu-1"
-          className="block lg:inline-block mt-4 lg:mt-0 text-slate-800 px-4 py-2 rounded hover:text-white hover:bg-slate-950 mr-2"
-        >
-          Menu 1
-        </button>
-        <button
-          type="button"
-          data-testid="nav-menu-2"
-          className="block lg:inline-block mt-4 lg:mt-0 text-slate-800 px-4 py-2 rounded hover:text-white hover:bg-slate-950 mr-2"
-        >
-          Menu 2
-        </button>
-        <button
-          type="button"
-          data-testid="nav-menu-3"
-          className="block lg:inline-block mt-4 lg:mt-0 text-slate-800 px-4 py-2 rounded hover:text-white hover:bg-slate-950 mr-2"
-        >
-          Menu 3
-        </button>
-      </div>
+  const MenuItems = ({ isMobile = false }: { isMobile?: boolean }) => {
+    const renderAuthenticatedLinks = () => {
+      if (!currentUser || !isMobile) return null;
 
-      <div className="flex">
-        {currentUser ? (
-          // Show user info and logout when authenticated
-          isMobile ? (
-            <>
-              <span
-                className="block text-md px-4 py-2 text-slate-200 mt-4 lg:mt-0"
-                data-testid="nav-welcome"
-              >
-                Welcome, {currentUser}
-              </span>
-              <Link
-                href="/settings/security"
-                data-testid="nav-link-security-mobile"
-                className="block text-md px-4 ml-2 py-2 rounded text-slate-200 font-bold hover:bg-slate-950 mt-4 lg:mt-0"
-              >
-                Security
-              </Link>
-              <Link
-                href="/settings/account"
-                data-testid="nav-link-account"
-                className="block text-md px-4 ml-2 py-2 rounded text-slate-200 font-bold hover:bg-slate-950 mt-4 lg:mt-0"
-              >
-                Account
-              </Link>
-              <button
-                onClick={handleLogout}
-                data-testid={isMobile ? "logout-mobile" : "logout-desktop"}
-                className="block text-md px-4 ml-2 py-2 rounded text-slate-200 font-bold hover:bg-slate-950 mt-4 lg:mt-0"
-              >
-                Logout
-              </button>
-            </>
-          ) : null
-        ) : (
-          // Show login/register links when not authenticated
-          <>
-            <Link
-              href="/register"
-              className="block text-md px-4 py-2 rounded text-slate-200 ml-2 font-bold hover:bg-slate-950 mt-4 lg:mt-0"
-            >
-              Sign in
-            </Link>
-            <Link
-              href="/login"
-              className="block text-md px-4 ml-2 py-2 rounded text-slate-200 font-bold hover:bg-slate-950 mt-4 lg:mt-0"
-            >
-              Login
-            </Link>
-          </>
-        )}
+      return (
+        <div className="flex flex-col space-y-3 w-full text-slate-800">
+          <span
+            className="block text-md px-4 py-2 mt-1"
+            data-testid="nav-welcome"
+          >
+            Welcome, {currentUser}
+          </span>
+          <Link
+            href="/settings/security"
+            data-testid="nav-link-security-mobile"
+            className="block w-full text-left text-md px-4 py-2 rounded font-bold hover:bg-slate-300"
+            onClick={() => setDrawerOpen(false)}
+          >
+            Security
+          </Link>
+          <Link
+            href="/settings/account"
+            data-testid="nav-link-account"
+            className="block w-full text-left text-md px-4 py-2 rounded font-bold hover:bg-slate-300"
+            onClick={() => setDrawerOpen(false)}
+          >
+            Account
+          </Link>
+          <button
+            onClick={handleLogout}
+            data-testid={isMobile ? "logout-mobile" : "logout-desktop"}
+            className="block w-full text-left text-md px-4 py-2 rounded font-bold hover:bg-slate-300"
+          >
+            Logout
+          </button>
+        </div>
+      );
+    };
+
+    const renderUnauthenticatedLinks = () => {
+      if (currentUser || !isMobile) return null;
+
+      return (
+        <div className="flex flex-col space-y-3 w-full mt-2">
+          <Link
+            href="/register"
+            className="block w-full text-left text-md px-4 py-2 rounded text-slate-200 font-bold hover:bg-slate-950"
+            onClick={() => setDrawerOpen(false)}
+          >
+            Sign in
+          </Link>
+          <Link
+            href="/login"
+            className="block w-full text-left text-md px-4 py-2 rounded text-slate-200 font-bold hover:bg-slate-950"
+            onClick={() => setDrawerOpen(false)}
+          >
+            Login
+          </Link>
+        </div>
+      );
+    };
+
+    return (
+      <div
+        className={
+          isMobile
+            ? "flex flex-col space-y-3 w-full"
+            : "flex items-center w-full"
+        }
+      >
+        {renderAuthenticatedLinks()}
+        {renderUnauthenticatedLinks()}
       </div>
-    </>
-  );
+    );
+  };
 
   return (
     <>
@@ -234,14 +229,14 @@ export default function NavBarClient({ currentUser }: NavBarClientProps) {
         ref={drawerRef}
         className={`fixed top-0 left-0 h-full w-64 bg-slate-200 z-50 transform transition-transform duration-300 ease-in-out lg:hidden ${
           drawerOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        } overflow-hidden`}
         data-testid="nav-drawer"
       >
         <div className="flex flex-col h-full p-6 pt-20">
           <div className="mb-8">
             <span className="font-semibold text-lg text-slate-800">Menu</span>
           </div>
-          <div className="flex flex-col space-y-2 flex-grow">
+          <div className="flex flex-col space-y-3 flex-grow items-start">
             <MenuItems isMobile={true} />
           </div>
           <button

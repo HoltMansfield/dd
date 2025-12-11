@@ -136,8 +136,8 @@ test.describe("Account lockout functionality", () => {
       await page.goto(`${process.env.E2E_URL}/`);
     }
 
-    // Verify we're on the home page by checking for the logout button
-    await expect(page.locator('[data-testid="logout-desktop"]')).toBeVisible({
+    // Verify we're on the home page by checking for the user menu trigger
+    await expect(page.getByTestId("nav-user-menu-trigger")).toBeVisible({
       timeout: 10000,
     });
   });
@@ -198,13 +198,13 @@ test.describe("Account lockout functionality", () => {
       await page.goto(`${process.env.E2E_URL}/`);
     }
 
-    // Verify we're on the home page by checking for the logout button
-    await expect(page.locator('[data-testid="logout-desktop"]')).toBeVisible({
-      timeout: 10000,
-    });
+    // Verify we're on the home page by checking for the user menu trigger
+    const userMenuTrigger = page.getByTestId("nav-user-menu-trigger");
+    await expect(userMenuTrigger).toBeVisible({ timeout: 10000 });
 
-    // Logout
-    await page.click('[data-testid="logout-desktop"]');
+    // Logout via user menu
+    await userMenuTrigger.click();
+    await page.getByTestId("logout-desktop").click();
     await page.waitForTimeout(1000);
 
     // Ensure we're on the login page

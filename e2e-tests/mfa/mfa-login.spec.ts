@@ -271,8 +271,10 @@ test.describe("MFA - Login Flow", () => {
     expect(afterCount).toBe(2);
     console.log(`Backup codes after use: ${afterCount}`);
 
-    // Logout (click the visible logout button)
-    await page.locator('button:has-text("Logout")').last().click();
+    // Logout via navbar menu
+    const menuTrigger = page.getByTestId("nav-user-menu-trigger");
+    await menuTrigger.click();
+    await page.getByTestId("logout-desktop").click();
     await expect(page).toHaveURL("/login");
 
     // Try to use same backup code again

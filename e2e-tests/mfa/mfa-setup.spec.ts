@@ -68,8 +68,16 @@ test.describe("MFA - Setup and Management", () => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    // Click Security link in navbar (use .last() to get the desktop version)
-    await page.locator('a[href="/settings/security"]').last().click();
+    // Open user menu and click Security link
+    const menuTrigger = page.getByTestId("nav-user-menu-trigger");
+    await expect(menuTrigger).toBeVisible({ timeout: 10000 });
+    await menuTrigger.click();
+    await expect(page.getByTestId("nav-user-menu")).toBeVisible({
+      timeout: 5000,
+    });
+    const securityLink = page.getByTestId("nav-link-security-desktop");
+    await expect(securityLink).toBeVisible({ timeout: 5000 });
+    await securityLink.click();
 
     // Should be on security settings page
     await expect(page).toHaveURL("/settings/security");

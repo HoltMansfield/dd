@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 import * as Sentry from "@sentry/nextjs";
-import "../../sentry.client.config";
+import "../../../sentry.client.config";
 
 export default function SentryProvider({
   children,

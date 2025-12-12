@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { verifyMFAToken, verifyMFABackupCode } from "../actions/mfa";
-import { shouldEnforceMFA } from "../lib/mfa-config";
+import { verifyMFAToken, verifyMFABackupCode } from "@/actions/mfa";
+import { shouldEnforceMFA } from "@/lib/mfa-config";
 import { withSentryErrorClient } from "@/sentry-error";
 import { LoadingButton } from "@/components/forms/LoadingButton";
 

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import MFASetup from "../../../components/MFASetup";
+import MFASetup from "@/components/core/mfa/MFASetup";
 import { disableMFAAction } from "../../../actions/mfa";
 import { getMFAEnforcementMessage } from "../../../lib/mfa-config";
 import { withSentryErrorClient } from "@/sentry-error";

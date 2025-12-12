@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import DocumentUpload from "@/components/DocumentUpload";
-import DocumentsList from "@/components/DocumentsList";
+import DocumentUpload from "@/components/documents/DocumentUpload";
+import DocumentsList from "@/components/documents/DocumentsList";
 
 export default function E2EFileUploadPage() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);

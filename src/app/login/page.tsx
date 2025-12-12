@@ -13,10 +13,10 @@ import { withSentryErrorClient } from "@/sentry-error";
 import { loginAction } from "./actions";
 import { schema, LoginFormInputs } from "./schema";
 import { logSessionExpiration } from "./SessionExpirationLogger";
-import ServerError from "@/components/forms/ServerError";
 import SubmitButton from "@/components/forms/SubmitButton";
 import TextInput from "@/components/forms/TextInput";
 import Form from "@/components/forms/Form";
+import { ErrorMessage } from "@/components/forms/ErrorMessage";
 
 import { Card } from "@radix-ui/themes";
 import {
@@ -134,7 +134,13 @@ function LoginForm() {
                 autoComplete="new-password"
                 disabled={isPending}
               />
-              {state?.error && <ServerError message={state.error} />}
+              {state?.error && (
+                <ErrorMessage
+                  message={state.error}
+                  className="mt-2"
+                  data-testid="server-error"
+                />
+              )}
               <SubmitButton isPending={isPending}>Login</SubmitButton>
             </Form>
           </FormProvider>

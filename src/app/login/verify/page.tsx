@@ -2,8 +2,9 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
-import MFAVerification from "../../../components/MFAVerification";
+import MFAVerification from "@/components/core/mfa/MFAVerification";
 import { completeMFALogin } from "./actions";
+import { ErrorMessage } from "@/components/forms/ErrorMessage";
 
 function MFAVerifyContent() {
   const router = useRouter();
@@ -41,9 +42,7 @@ function MFAVerifyContent() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-8 bg-gray-50">
       {error && (
-        <div className="max-w-md w-full bg-red-50 border border-red-200 rounded-md p-4 mb-4">
-          <p className="text-sm text-red-800">{error}</p>
-        </div>
+        <ErrorMessage message={error} className="max-w-md w-full mb-4" />
       )}
       <MFAVerification
         userId={userId}

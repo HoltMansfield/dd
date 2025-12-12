@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { initializeMFASetup, completeMFASetup } from "../actions/mfa";
-import { getMFAEnforcementMessage } from "../lib/mfa-config";
+import { initializeMFASetup, completeMFASetup } from "@/actions/mfa";
+import { getMFAEnforcementMessage } from "@/lib/mfa-config";
 import { withSentryErrorClient } from "@/sentry-error";
 import { LoadingButton } from "@/components/forms/LoadingButton";
 

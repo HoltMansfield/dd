@@ -11,9 +11,9 @@ export const metadata: Metadata = {
   description: "Next.js app with Drizzle, Tailwind, and Google Auth",
 };
 
-import NavBar from "@/components/NavBar";
-import SentryProvider from "@/components/SentryProvider";
-import SessionTimeoutWarning from "@/components/SessionTimeoutWarning";
+import NavBar from "@/components/core/nav/NavBar";
+import SessionTimeoutWarning from "@/components/core/SessionTimeoutWarning";
+import SentryProvider from "@/components/core/SentryProvider";
 
 export default function RootLayout({
   children,

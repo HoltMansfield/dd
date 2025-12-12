@@ -7,6 +7,8 @@ import { withSentryErrorClient } from "@/sentry-error";
 import { SubmitButton } from "@/components/forms/SubmitButton";
 import Form from "@/components/forms/Form";
 import { TextArea } from "@radix-ui/themes";
+import { ErrorMessage } from "@/components/forms/ErrorMessage";
+import { SuccessMessage } from "@/components/forms/SuccessMessage";
 
 export default function DocumentUpload({
   onUploadSuccess,
@@ -145,20 +147,10 @@ export default function DocumentUpload({
           />
         </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-sm text-red-800">{error}</p>
-          </div>
-        )}
+        {error && <ErrorMessage message={error} />}
 
-        {/* Success Message */}
         {success && (
-          <div className="p-3 bg-green-50 border border-green-200 rounded-md">
-            <p className="text-sm text-green-800">
-              Document uploaded successfully!
-            </p>
-          </div>
+          <SuccessMessage message="Document uploaded successfully!" />
         )}
 
         {/* Submit Button */}

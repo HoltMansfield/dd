@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import DocumentUpload from "@/components/DocumentUpload";
-import DocumentsList from "@/components/DocumentsList";
+import DocumentUpload from "@/components/documents/DocumentUpload";
+import DocumentsList from "@/components/documents/DocumentsList";
 
 export default function DocumentsPage() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
